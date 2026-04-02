@@ -119,7 +119,7 @@ function compareTexts(csText, cmxText) {
     }
   }
 
-  // Check manual-copy fields
+  // Check manual-copy fields (generate scripts + differences + warnings)
   var warnings = [];
   for (var j = 0; j < MANUAL_FIELDS.length; j++) {
     var field = MANUAL_FIELDS[j];
@@ -129,6 +129,18 @@ function compareTexts(csText, cmxText) {
     var cmxVal = cmxMap[field.cmxLabel];
 
     if (isCmxEmpty || cmxVal === undefined || csVal !== cmxVal) {
+      // Generate jQuery script
+      var manualScript = generateJQueryScript(field.templateType, field.cmxLabel, csVal);
+      if (manualScript) {
+        scripts.push(manualScript);
+        differences.push({
+          csLabel: field.csLabel,
+          cmxLabel: field.cmxLabel,
+          csValue: csVal,
+          cmxValue: cmxVal || '(empty)',
+        });
+      }
+      // Keep warning
       warnings.push(field.warningText);
     }
   }

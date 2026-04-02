@@ -308,12 +308,14 @@ var MANUAL_FIELDS = [
     csLabel: 'Hero Description',
     csEndLabel: 'Hero Image',
     cmxLabel: 'Description',
-    warningText: '"Description" ("Hero Description" on Content Studio) needs to be edited',
+    templateType: 'tinymce-textarea',
+    warningText: '"Description" ("Hero Description" on Content Studio) will be edited',
   },
   {
     csLabel: 'Deal Great For Text',
     csEndLabel: 'Page / Browser Title',
     cmxLabel: 'Deal Great For Text',
-    warningText: '"Deal Great For Text" needs to be edited',
+    templateType: 'tinymce-textarea',
+    warningText: '"Deal Great For Text" will be edited',
   },
 ];
