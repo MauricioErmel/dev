@@ -1,0 +1,131 @@
+// ===== COMPARE MODULE =====
+
+/**
+ * Generate a jQuery script based on template type, CMX label, and value
+ */
+function generateJQueryScript(templateType, cmxLabel, value) {
+  // Escape single quotes in the value for safe JS string embedding
+  var escapedValue = value.replace(/'/g, "\\'");
+
+  switch (templateType) {
+    case 'text-input':
+      return "$(document).ready(function () { $('label:contains(\"" + cmxLabel + "\")').closest('.dds__form__field').find('input[type=\"text\"]').val('" + escapedValue + "'); });";
+
+    case 'select-dropdown':
+      return "$(document).ready(function () { $('label').filter(function () { return $(this).text().trim().replace(/\\s+/g, ' ') === '" + cmxLabel + "'; }).closest('.dds__select').find('select').val('" + escapedValue + "').trigger('change'); });";
+
+    case 'tinymce-textarea':
+      return "$(document).ready(function () { var lbl = $('label').filter(function() { return $(this).text().trim().replace(/\\s+/g, ' ') === '" + cmxLabel + "'; }); var tid = lbl.closest('.dds__form__field').find('textarea').attr('id'); if (typeof tinymce !== 'undefined' && tinymce.get(tid)) { tinymce.get(tid).setContent('" + escapedValue + "'); } else { lbl.closest('.dds__form__field').find('iframe').contents().find('body').html('<p>" + escapedValue + "</p>'); } });";
+
+    default:
+      return '';
+  }
+}
+
+/**
+ * Parse plain text input (label on one line, value on the next)
+ * Returns a Map of label → value
+ */
+function parseTextToMap(text) {
+  var lines = text.split('\n').map(function(line) { return line.replace(/\r$/, ''); });
+  var map = {};
+
+  for (var i = 0; i < lines.length; i++) {
+    var trimmed = lines[i].trim();
+    if (trimmed !== '') {
+      var valueLine = (i + 1 < lines.length) ? lines[i + 1].trim() : '';
+      map[trimmed] = valueLine;
+    }
+  }
+
+  return map;
+}
+
+/**
+ * Get the value between two labels in the raw text
+ * (for manual-copy fields like Hero Description)
+ */
+function getValueBetweenLabels(text, startLabel, endLabel) {
+  var lines = text.split('\n').map(function(line) { return line.replace(/\r$/, ''); });
+  var startIndex = -1;
+  var endIndex = lines.length;
+
+  for (var i = 0; i < lines.length; i++) {
+    var trimmed = lines[i].trim();
+    if (trimmed === startLabel) {
+      startIndex = i;
+    }
+    if (trimmed === endLabel && startIndex !== -1) {
+      endIndex = i;
+      break;
+    }
+  }
+
+  if (startIndex === -1) return null;
+
+  var valueLines = [];
+  for (var j = startIndex + 1; j < endIndex; j++) {
+    var t = lines[j].trim();
+    if (t !== '') {
+      valueLines.push(t);
+    }
+  }
+
+  return valueLines.length > 0 ? valueLines.join('\n') : null;
+}
+
+/**
+ * Main comparison function
+ * @param {string} csText - Content-Studio raw text
+ * @param {string} cmxText - CMX raw text (can be empty)
+ * @returns {{ scripts: string[], warnings: string[], differences: object[] }}
+ */
+function compareTexts(csText, cmxText) {
+  var csMap = parseTextToMap(csText);
+  var cmxMap = parseTextToMap(cmxText);
+  var isCmxEmpty = cmxText.trim() === '';
+
+  var scripts = [];
+  var differences = [];
+
+  // Check each comparison rule
+  for (var i = 0; i < COMPARISON_RULES.length; i++) {
+    var rule = COMPARISON_RULES[i];
+    var csValue = csMap[rule.csLabel];
+
+    // Skip if Content-Studio doesn't have this field
+    if (csValue === undefined || csValue === '') continue;
+
+    var cmxValue = cmxMap[rule.cmxLabel];
+
+    // Generate script if CMX is empty (fill all) or values differ
+    if (isCmxEmpty || cmxValue === undefined || csValue !== cmxValue) {
+      var script = generateJQueryScript(rule.templateType, rule.cmxLabel, csValue);
+      if (script) {
+        scripts.push(script);
+        differences.push({
+          csLabel: rule.csLabel,
+          cmxLabel: rule.cmxLabel,
+          csValue: csValue,
+          cmxValue: cmxValue || '(empty)',
+        });
+      }
+    }
+  }
+
+  // Check manual-copy fields
+  var warnings = [];
+  for (var j = 0; j < MANUAL_FIELDS.length; j++) {
+    var field = MANUAL_FIELDS[j];
+    var csVal = getValueBetweenLabels(csText, field.csLabel, field.csEndLabel);
+    if (csVal === null) continue;
+
+    var cmxVal = cmxMap[field.cmxLabel];
+
+    if (isCmxEmpty || cmxVal === undefined || csVal !== cmxVal) {
+      warnings.push(field.warningText);
+    }
+  }
+
+  return { scripts: scripts, warnings: warnings, differences: differences };
+}

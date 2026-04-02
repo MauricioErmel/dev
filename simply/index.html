@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="DMC Manager — Deals Maintenance on CMX Manager. Browse and access CMX category pages across profiles and compare Content-Studio data.">
+  <title>DMC Manager</title>
+  <link rel="stylesheet" href="styles/mainstyle.css">
+</head>
+<body>
+
+  <!-- ===== NAVBAR ===== -->
+  <nav class="navbar">
+    <a href="#" class="navbar-brand" id="nav-logo">
+      <img src="assets/logo.svg" alt="DMC Manager Logo">
+      <span>DMC Manager</span>
+    </a>
+    <div class="nav-tabs">
+      <button class="nav-tab active" id="tab-dashboard" data-page="dashboard">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+        </svg>
+        <span>Dashboard</span>
+      </button>
+      <button class="nav-tab" id="tab-compare" data-page="compare">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        </svg>
+        <span>Comparison Tool</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ===== DASHBOARD PAGE ===== -->
+  <div class="page active" id="page-dashboard">
+    <!-- Page header -->
+    <div class="page-header">
+      <div class="page-header-inner">
+        <h1>Deals Dashboard</h1>
+        <p>Browse and access CMX category pages across <span id="total-profiles">28</span> profiles</p>
+
+        <!-- Filter bar -->
+        <div class="filter-bar">
+          <div class="filter-group">
+            <label for="filter-category">Filter by Category</label>
+            <select id="filter-category">
+              <option value="">All Categories</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="filter-profile">Filter by Profile</label>
+            <select id="filter-profile">
+              <option value="">All Profiles</option>
+            </select>
+          </div>
+          <button class="btn-clear-filters" id="btn-clear-filters">✕ Clear Filters</button>
+          <div class="filter-count" id="filter-count">Showing 28 of 28 profiles</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile grid -->
+    <div class="main-content">
+      <div class="profile-grid" id="profile-grid"></div>
+      <div class="empty-state hidden" id="empty-state">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        <p class="title">No profiles match your filters</p>
+        <p class="subtitle">Try adjusting or clearing your filters</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== COMPARISON TOOL PAGE ===== -->
+  <div class="page" id="page-compare">
+    <!-- Page header -->
+    <div class="page-header">
+      <div class="page-header-inner">
+        <h1>Comparison Tool</h1>
+        <p>Compare Content-Studio data with CMX fields and generate jQuery scripts</p>
+      </div>
+    </div>
+
+    <div class="compare-layout">
+      <!-- Input section -->
+      <div class="textarea-grid">
+        <div class="field-group">
+          <div class="field-legend">
+            <span class="legend-dot cs"></span>
+            Content-Studio
+          </div>
+          <textarea id="cs-textarea" class="field-textarea" placeholder="Paste Content-Studio data here...&#10;&#10;Tab Name&#10;Summer Sale Deals&#10;Hero Subtitle&#10;Save big on tech&#10;..."></textarea>
+        </div>
+        <div class="field-group">
+          <div class="field-legend">
+            <span class="legend-dot cmx"></span>
+            CMX
+          </div>
+          <textarea id="cmx-textarea" class="field-textarea" placeholder="Paste CMX data here (leave empty to generate all scripts)...&#10;&#10;Display Name&#10;Summer Sale Deals&#10;Short Title&#10;Save big on tech&#10;..."></textarea>
+        </div>
+      </div>
+
+      <!-- Action buttons -->
+      <div class="action-row">
+        <button class="btn btn-primary" id="btn-compare" disabled>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
+          Compare
+        </button>
+        <button class="btn btn-ghost" id="btn-clear">Clear</button>
+      </div>
+
+      <!-- Canonical URL section -->
+      <div class="canonical-section">
+        <label for="canonical-profile">Canonical URL Profile:</label>
+        <select id="canonical-profile"></select>
+        <div class="canonical-url-display">
+          <code id="canonical-url-output">Canonical Url: https://www.dell.com/en-us/shop/deals/dc/</code>
+        </div>
+      </div>
+
+      <!-- Results section (hidden by default) -->
+      <div class="results-section hidden" id="results-section">
+        <div class="results-divider">Comparison Results</div>
+
+        <!-- Success alert -->
+        <div class="alert alert-success hidden" id="alert-success">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>All fields match! No scripts needed.</span>
+        </div>
+
+        <!-- Differences container -->
+        <div class="hidden" id="diff-container">
+          <div class="diff-header">
+            <h3 id="diff-count-text"></h3>
+            <button class="btn btn-sm btn-primary" id="btn-copy-scripts">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              <span id="copy-btn-text">Copy All Scripts</span>
+            </button>
+          </div>
+
+          <!-- Differences table -->
+          <div class="diff-table-wrapper">
+            <table class="diff-table">
+              <thead>
+                <tr>
+                  <th>Content-Studio Field</th>
+                  <th>CMX Field</th>
+                  <th>CS Value</th>
+                  <th>CMX Value</th>
+                </tr>
+              </thead>
+              <tbody id="diff-table-body"></tbody>
+            </table>
+          </div>
+
+          <!-- jQuery scripts output -->
+          <div class="script-block" id="scripts-output"></div>
+        </div>
+
+        <!-- Warnings container -->
+        <div id="warnings-container"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="scripts/data.js"></script>
+  <script src="scripts/compare.js"></script>
+  <script src="scripts/app.js"></script>
+</body>
+</html>
