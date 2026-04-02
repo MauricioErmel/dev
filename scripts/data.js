@@ -267,24 +267,19 @@ var PROFILE_URLS = {
     'pc-accessories-deals': 'https://cmxtools.dell.com/content?collectionid=30440fdb-473c-4ffb-bceb-22bbe058a17a&formtype=item&id=d2ad89bb-c945-43f8-9a35-782b96d1fbe8&key=pc-accessories-deals',
     'business-deals': 'https://cmxtools.dell.com/content?collectionid=30440fdb-473c-4ffb-bceb-22bbe058a17a&formtype=item&id=dac43c89-c492-494e-bbcd-1376ee390851&key=business-deals',
   },
-  'en/au': {},
-  'en/nz': {},
-  'pl/pl': {},
 };
 
 // Profile display order
 var PROFILE_ORDER = [
   'en/us', 'en/ca', 'fr/ca', 'zh/cn', 'en/uk', 'pt/br',
-  'en/au', 'en/nz',
   'de/de', 'fr/fr', 'sv/se', 'ja/jp', 'en/in', 'de/ch',
   'en/sg', 'en/my', 'nl/nl', 'es/es', 'de/at', 'nl/be',
   'fr/be', 'fr/ch', 'da/dk', 'en/ie', 'it/it', 'no/no',
   'en/hk', 'zh/hk', 'zh/tw', 'ko/kr',
-  'pl/pl',
 ];
 
 // Build the profiles array with computed flags
-var profiles = PROFILE_ORDER.map(function(id) {
+var profiles = PROFILE_ORDER.map(function (id) {
   return {
     id: id,
     slug: profileToSlug(id),
@@ -297,15 +292,15 @@ var profiles = PROFILE_ORDER.map(function(id) {
 
 // ===== COMPARISON RULES =====
 var COMPARISON_RULES = [
-  { csLabel: 'Tab Name',                cmxLabel: 'Display Name',    templateType: 'text-input' },
-  { csLabel: 'Hero Subtitle',           cmxLabel: 'Short Title',     templateType: 'text-input' },
-  { csLabel: 'Page / Browser Title',    cmxLabel: 'Browser Title',   templateType: 'text-input' },
-  { csLabel: 'Page / Browser Title',    cmxLabel: 'Title',           templateType: 'text-input' },
-  { csLabel: 'Keywords',                cmxLabel: 'SEO Keywords',    templateType: 'text-input' },
-  { csLabel: 'Font Color',              cmxLabel: 'Font Color',      templateType: 'select-dropdown' },
-  { csLabel: 'Mobile Background Color', cmxLabel: 'Background Color',templateType: 'select-dropdown' },
-  { csLabel: 'Tab Icon Code',           cmxLabel: 'Icon Code',       templateType: 'text-input' },
-  { csLabel: 'SEO Meta Description',    cmxLabel: 'SEO Description', templateType: 'tinymce-textarea' },
+  { csLabel: 'Tab Name', cmxLabel: 'Display Name', templateType: 'text-input' },
+  { csLabel: 'Hero Subtitle', cmxLabel: 'Short Title', templateType: 'text-input' },
+  { csLabel: 'Page / Browser Title', cmxLabel: 'Browser Title', templateType: 'text-input' },
+  { csLabel: 'Page / Browser Title', cmxLabel: 'Title', templateType: 'text-input' },
+  { csLabel: 'Keywords', cmxLabel: 'SEO Keywords', templateType: 'text-input' },
+  { csLabel: 'Font Color', cmxLabel: 'Font Color', templateType: 'select-dropdown' },
+  { csLabel: 'Mobile Background Color', cmxLabel: 'Background Color', templateType: 'select-dropdown' },
+  { csLabel: 'Tab Icon Code', cmxLabel: 'Icon Code', templateType: 'text-input' },
+  { csLabel: 'SEO Meta Description', cmxLabel: 'SEO Description', templateType: 'tinymce-textarea' },
 ];
 
 var MANUAL_FIELDS = [
@@ -313,7 +308,7 @@ var MANUAL_FIELDS = [
     csLabel: 'Hero Description',
     csEndLabel: 'Hero Image',
     cmxLabel: 'Description',
-    warningText: '"Description" needs to be edited',
+    warningText: '"Description" ("Hero Description" on Content Studio) needs to be edited',
   },
   {
     csLabel: 'Deal Great For Text',

@@ -12,11 +12,16 @@
 
   // Dashboard elements
   var filterCategory = document.getElementById('filter-category');
-  var filterProfile  = document.getElementById('filter-profile');
+  var filterProfile  = document.getElementById('filter-profile'); // hidden
+  var profileSearch  = document.getElementById('profile-search');
+  var profileOptions = document.getElementById('profile-options');
   var btnClearFilters = document.getElementById('btn-clear-filters');
   var filterCountEl  = document.getElementById('filter-count');
   var profileGrid    = document.getElementById('profile-grid');
   var emptyState     = document.getElementById('empty-state');
+  var filterAdmin    = document.getElementById('filter-admin');
+  var filterImm      = document.getElementById('filter-imm');
+  var filterFaq      = document.getElementById('filter-faq');
 
   // Comparison Tool elements
   var csTextarea     = document.getElementById('cs-textarea');
@@ -64,13 +69,8 @@
       filterCategory.appendChild(opt);
     });
 
-    // Profile filter
-    profiles.forEach(function (p) {
-      var opt = document.createElement('option');
-      opt.value = p.id;
-      opt.textContent = p.id + (p.isAdmin ? ' ★' : '');
-      filterProfile.appendChild(opt);
-    });
+    // Profile filter (combobox)
+    renderProfileOptions('');
 
     // Canonical profile dropdown
     profiles.forEach(function (p) {
@@ -160,6 +160,12 @@
     var filtered = profiles.filter(function (p) {
       if (profFilter && p.id !== profFilter) return false;
       if (catFilter && !p.categories[catFilter]) return false;
+      
+      // Checkbox filters
+      if (filterAdmin.checked && !p.isAdmin) return false;
+      if (filterImm.checked   && !p.hasIMM) return false;
+      if (filterFaq.checked   && !p.hasFAQ) return false;
+      
       return true;
     });
 
@@ -181,7 +187,7 @@
     filterCountEl.textContent = 'Showing ' + filtered.length + ' of ' + profiles.length + ' profiles';
 
     // Toggle clear button
-    if (catFilter || profFilter) {
+    if (catFilter || profFilter || filterAdmin.checked || filterImm.checked || filterFaq.checked) {
       btnClearFilters.classList.add('visible');
     } else {
       btnClearFilters.classList.remove('visible');
@@ -190,10 +196,90 @@
 
   // Filter events
   filterCategory.addEventListener('change', renderDashboard);
-  filterProfile.addEventListener('change', renderDashboard);
+  filterAdmin.addEventListener('change', renderDashboard);
+  filterImm.addEventListener('change', renderDashboard);
+  filterFaq.addEventListener('change', renderDashboard);
+
+  // Combobox logic
+  profileSearch.addEventListener('focus', function () {
+    renderProfileOptions('');
+    profileOptions.classList.add('show');
+  });
+
+  document.getElementById('profile-combobox').addEventListener('click', function() {
+    profileSearch.focus();
+  });
+
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest('#profile-combobox')) {
+      profileOptions.classList.remove('show');
+    }
+  });
+
+  profileSearch.addEventListener('input', function () {
+    renderProfileOptions(this.value);
+    profileOptions.classList.add('show');
+  });
+
+  function renderProfileOptions(searchText) {
+    profileOptions.innerHTML = '';
+    
+    // "All Profiles" option
+    if (!searchText) {
+      var allOpt = document.createElement('div');
+      allOpt.className = 'combobox-option' + (!filterProfile.value ? ' selected' : '');
+      allOpt.textContent = 'All Profiles';
+      allOpt.addEventListener('click', function () {
+        selectProfile('', 'All Profiles');
+      });
+      profileOptions.appendChild(allOpt);
+    }
+
+    var filtered = profiles.filter(function (p) {
+      return p.id.toLowerCase().indexOf(searchText.toLowerCase()) !== -1;
+    });
+
+    filtered.forEach(function (p) {
+      var div = document.createElement('div');
+      div.className = 'combobox-option' + (filterProfile.value === p.id ? ' selected' : '');
+      
+      var textSpan = document.createElement('span');
+      textSpan.textContent = p.id;
+      div.appendChild(textSpan);
+
+      if (p.isAdmin) {
+        var star = document.createElement('span');
+        star.className = 'combobox-option-admin';
+        star.textContent = '★';
+        div.appendChild(star);
+      }
+
+      div.addEventListener('click', function () {
+        selectProfile(p.id, p.id);
+      });
+      profileOptions.appendChild(div);
+    });
+  }
+
+  function selectProfile(value, label) {
+    filterProfile.value = value;
+    profileSearch.value = value === '' ? '' : label; // Keep empty for All Profiles
+    if (value === '') profileSearch.placeholder = 'All Profiles';
+    else profileSearch.placeholder = 'Select or search...';
+    
+    profileOptions.classList.remove('show');
+    renderDashboard();
+  }
+
   btnClearFilters.addEventListener('click', function () {
     filterCategory.value = '';
     filterProfile.value = '';
+    profileSearch.value = '';
+    profileSearch.placeholder = 'Select or search...';
+    renderProfileOptions('');
+    filterAdmin.checked = false;
+    filterImm.checked = false;
+    filterFaq.checked = false;
     renderDashboard();
   });
 
