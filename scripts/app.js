@@ -20,6 +20,7 @@
   var profileGrid = document.getElementById('profile-grid');
   var emptyState = document.getElementById('empty-state');
   var filterAdmin = document.getElementById('filter-admin');
+  var filterNotAdmin = document.getElementById('filter-not-admin');
   var filterImm = document.getElementById('filter-imm');
   var filterFaq = document.getElementById('filter-faq');
 
@@ -163,6 +164,7 @@
 
       // Checkbox filters
       if (filterAdmin.checked && !p.isAdmin) return false;
+      if (filterNotAdmin.checked && p.isAdmin) return false;
       if (filterImm.checked && !p.hasIMM) return false;
       if (filterFaq.checked && !p.hasFAQ) return false;
 
@@ -187,7 +189,7 @@
     filterCountEl.textContent = 'Showing ' + filtered.length + ' of ' + profiles.length + ' profiles';
 
     // Toggle clear button
-    if (catFilter || profFilter || filterAdmin.checked || filterImm.checked || filterFaq.checked) {
+    if (catFilter || profFilter || filterAdmin.checked || filterNotAdmin.checked || filterImm.checked || filterFaq.checked) {
       btnClearFilters.classList.add('visible');
     } else {
       btnClearFilters.classList.remove('visible');
@@ -196,7 +198,14 @@
 
   // Filter events
   filterCategory.addEventListener('change', renderDashboard);
-  filterAdmin.addEventListener('change', renderDashboard);
+  filterAdmin.addEventListener('change', function () {
+    if (filterAdmin.checked) filterNotAdmin.checked = false;
+    renderDashboard();
+  });
+  filterNotAdmin.addEventListener('change', function () {
+    if (filterNotAdmin.checked) filterAdmin.checked = false;
+    renderDashboard();
+  });
   filterImm.addEventListener('change', renderDashboard);
   filterFaq.addEventListener('change', renderDashboard);
 
@@ -278,6 +287,7 @@
     profileSearch.placeholder = 'Select or search...';
     renderProfileOptions('');
     filterAdmin.checked = false;
+    filterNotAdmin.checked = false;
     filterImm.checked = false;
     filterFaq.checked = false;
     renderDashboard();
