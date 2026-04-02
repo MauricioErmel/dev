@@ -841,9 +841,34 @@ body {
   background: var(--bg-surface-2);
 }
 
+.diff-table tr.row-no-update td {
+  background: rgba(37, 182, 210, 0.08);
+  color: var(--text-dim) !important;
+}
+
+.diff-table tr.row-no-update:nth-child(even) td {
+  background: rgba(37, 182, 210, 0.12);
+}
+
 .diff-table .col-cs-value { color: var(--success); max-width: 12rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.diff-table tr.row-no-update .col-cs-value { color: inherit; }
 .diff-table .col-cmx-value { color: var(--error); max-width: 12rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.diff-table tr.row-no-update .col-cmx-value { color: inherit; }
 .diff-table .col-label { font-weight: 500; }
+
+.badge-no-update {
+  display: inline-block;
+  margin-left: 0.3rem;
+  padding: 0.02rem 0.2rem;
+  font-size: 0.4rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--info);
+  background: var(--info-bg);
+  border-radius: 0.15rem;
+  vertical-align: middle;
+}
 
 /* Script block */
 .script-block {

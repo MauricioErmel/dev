@@ -98,25 +98,37 @@ function compareTexts(csText, cmxText) {
   for (var i = 0; i < COMPARISON_RULES.length; i++) {
     var rule = COMPARISON_RULES[i];
     var csValue = csMap[rule.csLabel];
-
-    // Skip if Content-Studio doesn't have this field
-    if (csValue === undefined || csValue === '') continue;
-
     var cmxValue = cmxMap[rule.cmxLabel];
 
-    // Generate script if CMX is empty (fill all) or values differ
-    if (isCmxEmpty || cmxValue === undefined || csValue !== cmxValue) {
+    var isCsEmpty = (csValue === undefined || csValue === '');
+    var needsUpdate = false;
+    var matchReason = '';
+
+    if (isCsEmpty) {
+      needsUpdate = false;
+      matchReason = 'Empty in Content-Studio';
+    } else if (isCmxEmpty || cmxValue === undefined || csValue !== cmxValue) {
+      needsUpdate = true;
+    } else {
+      needsUpdate = false;
+      matchReason = 'Values match';
+    }
+
+    if (needsUpdate) {
       var script = generateJQueryScript(rule.templateType, rule.cmxLabel, csValue);
       if (script) {
         scripts.push(script);
-        differences.push({
-          csLabel: rule.csLabel,
-          cmxLabel: rule.cmxLabel,
-          csValue: csValue,
-          cmxValue: cmxValue || '(empty)',
-        });
       }
     }
+
+    differences.push({
+      csLabel: rule.csLabel,
+      cmxLabel: rule.cmxLabel,
+      csValue: csValue || '(empty)',
+      cmxValue: cmxValue || '(empty)',
+      needsUpdate: needsUpdate,
+      matchReason: matchReason
+    });
   }
 
   // Check manual-copy fields (generate scripts + differences + warnings)
@@ -124,25 +136,40 @@ function compareTexts(csText, cmxText) {
   for (var j = 0; j < MANUAL_FIELDS.length; j++) {
     var field = MANUAL_FIELDS[j];
     var csVal = getValueBetweenLabels(csText, field.csLabel, field.csEndLabel);
-    if (csVal === null) continue;
-
     var cmxVal = cmxMap[field.cmxLabel];
 
-    if (isCmxEmpty || cmxVal === undefined || csVal !== cmxVal) {
+    var isCsEmpty = (csVal === null || csVal === '');
+    var needsUpdate = false;
+    var matchReason = '';
+
+    if (isCsEmpty) {
+      needsUpdate = false;
+      matchReason = 'Empty in Content-Studio';
+    } else if (isCmxEmpty || cmxVal === undefined || csVal !== cmxVal) {
+      needsUpdate = true;
+    } else {
+      needsUpdate = false;
+      matchReason = 'Values match';
+    }
+
+    if (needsUpdate) {
       // Generate jQuery script
       var manualScript = generateJQueryScript(field.templateType, field.cmxLabel, csVal);
       if (manualScript) {
         scripts.push(manualScript);
-        differences.push({
-          csLabel: field.csLabel,
-          cmxLabel: field.cmxLabel,
-          csValue: csVal,
-          cmxValue: cmxVal || '(empty)',
-        });
       }
       // Keep warning
       warnings.push(field.warningText);
     }
+    
+    differences.push({
+      csLabel: field.csLabel,
+      cmxLabel: field.cmxLabel,
+      csValue: csVal || '(empty)',
+      cmxValue: cmxVal || '(empty)',
+      needsUpdate: needsUpdate,
+      matchReason: matchReason
+    });
   }
 
   return { scripts: scripts, warnings: warnings, differences: differences };

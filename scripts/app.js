@@ -4,42 +4,42 @@
   'use strict';
 
   // ===== DOM REFERENCES =====
-  var tabDashboard   = document.getElementById('tab-dashboard');
-  var tabCompare     = document.getElementById('tab-compare');
-  var pageDashboard  = document.getElementById('page-dashboard');
-  var pageCompare    = document.getElementById('page-compare');
-  var navLogo        = document.getElementById('nav-logo');
+  var tabDashboard = document.getElementById('tab-dashboard');
+  var tabCompare = document.getElementById('tab-compare');
+  var pageDashboard = document.getElementById('page-dashboard');
+  var pageCompare = document.getElementById('page-compare');
+  var navLogo = document.getElementById('nav-logo');
 
   // Dashboard elements
   var filterCategory = document.getElementById('filter-category');
-  var filterProfile  = document.getElementById('filter-profile'); // hidden
-  var profileSearch  = document.getElementById('profile-search');
+  var filterProfile = document.getElementById('filter-profile'); // hidden
+  var profileSearch = document.getElementById('profile-search');
   var profileOptions = document.getElementById('profile-options');
   var btnClearFilters = document.getElementById('btn-clear-filters');
-  var filterCountEl  = document.getElementById('filter-count');
-  var profileGrid    = document.getElementById('profile-grid');
-  var emptyState     = document.getElementById('empty-state');
-  var filterAdmin    = document.getElementById('filter-admin');
-  var filterImm      = document.getElementById('filter-imm');
-  var filterFaq      = document.getElementById('filter-faq');
+  var filterCountEl = document.getElementById('filter-count');
+  var profileGrid = document.getElementById('profile-grid');
+  var emptyState = document.getElementById('empty-state');
+  var filterAdmin = document.getElementById('filter-admin');
+  var filterImm = document.getElementById('filter-imm');
+  var filterFaq = document.getElementById('filter-faq');
 
   // Comparison Tool elements
-  var csTextarea     = document.getElementById('cs-textarea');
-  var cmxTextarea    = document.getElementById('cmx-textarea');
-  var btnCompare     = document.getElementById('btn-compare');
-  var btnClear       = document.getElementById('btn-clear');
+  var csTextarea = document.getElementById('cs-textarea');
+  var cmxTextarea = document.getElementById('cmx-textarea');
+  var btnCompare = document.getElementById('btn-compare');
+  var btnClear = document.getElementById('btn-clear');
   var canonicalProfile = document.getElementById('canonical-profile');
   var canonicalUrlOutput = document.getElementById('canonical-url-output');
   var btnCopyCanonical = document.getElementById('btn-copy-canonical');
   var resultsSection = document.getElementById('results-section');
-  var alertSuccess   = document.getElementById('alert-success');
-  var diffContainer  = document.getElementById('diff-container');
-  var diffCountText  = document.getElementById('diff-count-text');
-  var diffTableBody  = document.getElementById('diff-table-body');
-  var scriptsOutput  = document.getElementById('scripts-output');
+  var alertSuccess = document.getElementById('alert-success');
+  var diffContainer = document.getElementById('diff-container');
+  var diffCountText = document.getElementById('diff-count-text');
+  var diffTableBody = document.getElementById('diff-table-body');
+  var scriptsOutput = document.getElementById('scripts-output');
   var warningsContainer = document.getElementById('warnings-container');
   var btnCopyScripts = document.getElementById('btn-copy-scripts');
-  var copyBtnText    = document.getElementById('copy-btn-text');
+  var copyBtnText = document.getElementById('copy-btn-text');
 
   // ===== NAVIGATION =====
   function switchPage(pageName) {
@@ -154,18 +154,18 @@
   }
 
   function renderDashboard() {
-    var catFilter  = filterCategory.value;
+    var catFilter = filterCategory.value;
     var profFilter = filterProfile.value;
 
     var filtered = profiles.filter(function (p) {
       if (profFilter && p.id !== profFilter) return false;
       if (catFilter && !p.categories[catFilter]) return false;
-      
+
       // Checkbox filters
       if (filterAdmin.checked && !p.isAdmin) return false;
-      if (filterImm.checked   && !p.hasIMM) return false;
-      if (filterFaq.checked   && !p.hasFAQ) return false;
-      
+      if (filterImm.checked && !p.hasIMM) return false;
+      if (filterFaq.checked && !p.hasFAQ) return false;
+
       return true;
     });
 
@@ -206,7 +206,7 @@
     profileOptions.classList.add('show');
   });
 
-  document.getElementById('profile-combobox').addEventListener('click', function() {
+  document.getElementById('profile-combobox').addEventListener('click', function () {
     profileSearch.focus();
   });
 
@@ -223,7 +223,7 @@
 
   function renderProfileOptions(searchText) {
     profileOptions.innerHTML = '';
-    
+
     // "All Profiles" option
     if (!searchText) {
       var allOpt = document.createElement('div');
@@ -242,7 +242,7 @@
     filtered.forEach(function (p) {
       var div = document.createElement('div');
       div.className = 'combobox-option' + (filterProfile.value === p.id ? ' selected' : '');
-      
+
       var textSpan = document.createElement('span');
       textSpan.textContent = p.id;
       div.appendChild(textSpan);
@@ -266,7 +266,7 @@
     profileSearch.value = value === '' ? '' : label; // Keep empty for All Profiles
     if (value === '') profileSearch.placeholder = 'All Profiles';
     else profileSearch.placeholder = 'Select or search...';
-    
+
     profileOptions.classList.remove('show');
     renderDashboard();
   }
@@ -300,9 +300,8 @@
     // Show results section
     resultsSection.classList.remove('hidden');
 
-    var hasScripts  = result.scripts.length > 0;
+    var hasScripts = result.scripts.length > 0;
     var hasWarnings = result.warnings.length > 0;
-    var hasDiffs    = result.differences.length > 0;
 
     // Success alert
     if (!hasScripts && !hasWarnings) {
@@ -311,24 +310,32 @@
       alertSuccess.classList.add('hidden');
     }
 
-    // Differences
-    if (hasDiffs) {
-      diffContainer.classList.remove('hidden');
-      diffCountText.textContent = result.scripts.length + ' field' + (result.scripts.length !== 1 ? 's' : '') + ' need updating:';
+    // Always show differences breakdown
+    diffContainer.classList.remove('hidden');
+    var fieldsToUpdate = result.differences.filter(function (d) { return d.needsUpdate; }).length;
+    diffCountText.textContent = fieldsToUpdate + ' field' + (fieldsToUpdate !== 1 ? 's' : '') + ' need updating out of 11:';
 
-      // Build table rows
-      diffTableBody.innerHTML = '';
-      result.differences.forEach(function (diff) {
-        var tr = document.createElement('tr');
-        tr.innerHTML =
-          '<td class="col-label">' + escapeHtml(diff.csLabel) + '</td>' +
-          '<td>' + escapeHtml(diff.cmxLabel) + '</td>' +
-          '<td class="col-cs-value" title="' + escapeAttr(diff.csValue) + '">' + escapeHtml(diff.csValue) + '</td>' +
-          '<td class="col-cmx-value" title="' + escapeAttr(diff.cmxValue) + '">' + escapeHtml(diff.cmxValue) + '</td>';
-        diffTableBody.appendChild(tr);
-      });
+    // Build table rows
+    diffTableBody.innerHTML = '';
+    result.differences.forEach(function (diff) {
+      var tr = document.createElement('tr');
+      if (!diff.needsUpdate) {
+        tr.className = 'row-no-update';
+      }
+      var noUpdateBadge = !diff.needsUpdate ? ' <span class="badge-no-update" title="' + escapeAttr(diff.matchReason) + '">No Update</span>' : '';
+      tr.innerHTML =
+        '<td class="col-label">' + escapeHtml(diff.csLabel) + noUpdateBadge + '</td>' +
+        '<td>' + escapeHtml(diff.cmxLabel) + '</td>' +
+        '<td class="col-cs-value" title="' + escapeAttr(diff.csValue) + '">' + escapeHtml(diff.csValue) + '</td>' +
+        '<td class="col-cmx-value" title="' + escapeAttr(diff.cmxValue) + '">' + escapeHtml(diff.cmxValue) + '</td>';
+      diffTableBody.appendChild(tr);
+    });
 
-      // Build scripts
+    // Handle scripts
+    if (hasScripts) {
+      scriptsOutput.classList.remove('hidden');
+      btnCopyScripts.style.display = 'inline-flex';
+
       scriptsOutput.innerHTML = '';
       result.scripts.forEach(function (script, i) {
         if (i > 0) {
@@ -342,7 +349,9 @@
       // Store scripts for copy
       btnCopyScripts._scripts = result.scripts;
     } else {
-      diffContainer.classList.add('hidden');
+      scriptsOutput.classList.add('hidden');
+      btnCopyScripts.style.display = 'none';
+      btnCopyScripts._scripts = [];
     }
 
     // Warnings
@@ -420,7 +429,7 @@
   // Copy Canonical URL
   btnCopyCanonical.addEventListener('click', function () {
     var urlText = canonicalUrlOutput.textContent.replace('Canonical Url: ', '');
-    
+
     function showCanonicalCopyFeedback() {
       btnCopyCanonical.classList.add('btn-success-state');
       setTimeout(function () {
