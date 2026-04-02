@@ -7,18 +7,21 @@ function generateJQueryScript(templateType, cmxLabel, value) {
   // Escape single quotes in the value for safe JS string embedding
   var escapedValue = value.replace(/'/g, "\\'");
 
+  // Helper: trigger native DOM events so the form framework detects the change
+  var fireNativeEvents = "var el = inp[0]; el.dispatchEvent(new Event('input', {bubbles:true})); el.dispatchEvent(new Event('change', {bubbles:true})); el.dispatchEvent(new Event('blur', {bubbles:true}));";
+
   switch (templateType) {
     case 'text-input':
       if (cmxLabel === 'Icon Code') {
-        return "$(document).ready(function () { $('label:contains(\"" + cmxLabel + "\")').closest('.dds__form__field').find('input[type=\"text\"]').val('\\\\" + escapedValue + "#'); });";
+        return "$(document).ready(function () { var inp = $('label:contains(\"" + cmxLabel + "\")').closest('.dds__form__field').find('input[type=\"text\"]'); var nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set; nativeSetter.call(inp[0], '\\\\" + escapedValue + "'); " + fireNativeEvents + " });";
       }
-      return "$(document).ready(function () { $('label:contains(\"" + cmxLabel + "\")').closest('.dds__form__field').find('input[type=\"text\"]').val('" + escapedValue + "#'); });";
+      return "$(document).ready(function () { var inp = $('label:contains(\"" + cmxLabel + "\")').closest('.dds__form__field').find('input[type=\"text\"]'); var nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set; nativeSetter.call(inp[0], '" + escapedValue + "'); " + fireNativeEvents + " });";
 
     case 'select-dropdown':
-      return "$(document).ready(function () { $('label').filter(function () { return $(this).text().trim().replace(/\\s+/g, ' ') === '" + cmxLabel + "'; }).closest('.dds__select').find('select').val('" + escapedValue + "').trigger('change'); });";
+      return "$(document).ready(function () { var sel = $('label').filter(function () { return $(this).text().trim().replace(/\\s+/g, ' ') === '" + cmxLabel + "'; }).closest('.dds__select').find('select'); var nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype, 'value').set; nativeSetter.call(sel[0], '" + escapedValue + "'); var el = sel[0]; el.dispatchEvent(new Event('change', {bubbles:true})); el.dispatchEvent(new Event('blur', {bubbles:true})); });";
 
     case 'tinymce-textarea':
-      return "$(document).ready(function () { var lbl = $('label').filter(function() { return $(this).text().trim().replace(/\\s+/g, ' ') === '" + cmxLabel + "'; }); var tid = lbl.closest('.dds__form__field').find('textarea').attr('id'); if (typeof tinymce !== 'undefined' && tinymce.get(tid)) { tinymce.get(tid).setContent('" + escapedValue + "'); } else { lbl.closest('.dds__form__field').find('iframe').contents().find('body').html('<p>" + escapedValue + "</p>'); } });";
+      return "$(document).ready(function () { var lbl = $('label').filter(function() { return $(this).text().trim().replace(/\\s+/g, ' ') === '" + cmxLabel + "'; }); var tid = lbl.closest('.dds__form__field').find('textarea').attr('id'); if (typeof tinymce !== 'undefined' && tinymce.get(tid)) { var ed = tinymce.get(tid); ed.setContent('" + escapedValue + "'); ed.fire('change'); ed.setDirty(true); } else { lbl.closest('.dds__form__field').find('iframe').contents().find('body').html('<p>" + escapedValue + "</p>'); } });";
 
     default:
       return '';

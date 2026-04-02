@@ -410,13 +410,8 @@ body {
   color: #fff;
   background: var(--info);
   border-radius: 0.25rem;
-  animation: admin-pulse 2.5s ease-in-out infinite;
 }
 
-@keyframes admin-pulse {
-  0%, 100% { box-shadow: 0 0 4px rgba(37, 182, 210, 0.4); }
-  50%      { box-shadow: 0 0 12px rgba(37, 182, 210, 0.7); }
-}
 
 /* Indicators row */
 .indicators {
