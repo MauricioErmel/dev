@@ -9,7 +9,10 @@ function generateJQueryScript(templateType, cmxLabel, value) {
 
   switch (templateType) {
     case 'text-input':
-      return "$(document).ready(function () { $('label:contains(\"" + cmxLabel + "\")').closest('.dds__form__field').find('input[type=\"text\"]').val('" + escapedValue + "'); });";
+      if (cmxLabel === 'Icon Code') {
+        return "$(document).ready(function () { $('label:contains(\"" + cmxLabel + "\")').closest('.dds__form__field').find('input[type=\"text\"]').val('\\\\" + escapedValue + "#'); });";
+      }
+      return "$(document).ready(function () { $('label:contains(\"" + cmxLabel + "\")').closest('.dds__form__field').find('input[type=\"text\"]').val('" + escapedValue + "#'); });";
 
     case 'select-dropdown':
       return "$(document).ready(function () { $('label').filter(function () { return $(this).text().trim().replace(/\\s+/g, ' ') === '" + cmxLabel + "'; }).closest('.dds__select').find('select').val('" + escapedValue + "').trigger('change'); });";

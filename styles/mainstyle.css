@@ -619,6 +619,9 @@ body {
 .canonical-url-display {
   flex: 1;
   min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .canonical-url-display code {
@@ -684,6 +687,10 @@ body {
   border: 1px solid var(--warning-border);
   color: #92400e;
   margin-top: 0.5rem;
+}
+
+#warnings-container:not(:empty) {
+  margin-bottom: 1rem;
 }
 
 /* Differences header */

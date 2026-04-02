@@ -25,6 +25,7 @@
   var btnClear       = document.getElementById('btn-clear');
   var canonicalProfile = document.getElementById('canonical-profile');
   var canonicalUrlOutput = document.getElementById('canonical-url-output');
+  var btnCopyCanonical = document.getElementById('btn-copy-canonical');
   var resultsSection = document.getElementById('results-section');
   var alertSuccess   = document.getElementById('alert-success');
   var diffContainer  = document.getElementById('diff-container');
@@ -329,6 +330,36 @@
     var slug = profileToSlug(canonicalProfile.value);
     canonicalUrlOutput.textContent = 'Canonical Url: https://www.dell.com/' + slug + '/shop/deals/dc/';
   }
+
+  // Copy Canonical URL
+  btnCopyCanonical.addEventListener('click', function () {
+    var urlText = canonicalUrlOutput.textContent.replace('Canonical Url: ', '');
+    
+    function showCanonicalCopyFeedback() {
+      btnCopyCanonical.classList.add('btn-success-state');
+      setTimeout(function () {
+        btnCopyCanonical.classList.remove('btn-success-state');
+      }, 2000);
+    }
+
+    function fallback() {
+      var textarea = document.createElement('textarea');
+      textarea.value = urlText;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+      showCanonicalCopyFeedback();
+    }
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(urlText).then(showCanonicalCopyFeedback).catch(fallback);
+    } else {
+      fallback();
+    }
+  });
 
   // ===== UTILITY =====
   function escapeHtml(str) {
