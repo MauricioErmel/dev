@@ -3,18 +3,25 @@
 /**
  * Generate a jQuery script based on template type, CMX label, and value
  */
-function generateJQueryScript(templateType, cmxLabel, value) {
-  // Escape single quotes in the value for safe JS string embedding
-  var escapedValue = value.replace(/'/g, "\\'");
+function generateJQueryScript(templateType, cmxLabel, origValue) {
+  var value = origValue;
+
+  // Handle specific formatting requirements for Icon Code
+  if (cmxLabel === 'Icon Code') {
+    // If the user didn't include a backslash, add it
+    if (!value.startsWith('\\')) {
+      value = '\\' + value;
+    }
+  }
+
+  // Escape backslashes and single quotes for safe JS string embedding
+  var escapedValue = value.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
 
   // Helper: trigger native DOM events so the form framework detects the change
   var fireNativeEvents = "var el = inp[0]; el.dispatchEvent(new Event('input', {bubbles:true})); el.dispatchEvent(new Event('change', {bubbles:true})); el.dispatchEvent(new Event('blur', {bubbles:true}));";
 
   switch (templateType) {
     case 'text-input':
-      if (cmxLabel === 'Icon Code') {
-        return "$(document).ready(function () { var inp = $('label:contains(\"" + cmxLabel + "\")').closest('.dds__form__field').find('input[type=\"text\"]'); var nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set; nativeSetter.call(inp[0], '\\\\" + escapedValue + "'); " + fireNativeEvents + " });";
-      }
       return "$(document).ready(function () { var inp = $('label:contains(\"" + cmxLabel + "\")').closest('.dds__form__field').find('input[type=\"text\"]'); var nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set; nativeSetter.call(inp[0], '" + escapedValue + "'); " + fireNativeEvents + " });";
 
     case 'select-dropdown':
