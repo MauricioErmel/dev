@@ -29,7 +29,7 @@
   var cmxTextarea = document.getElementById('cmx-textarea');
   var btnCompare = document.getElementById('btn-compare');
   var btnClear = document.getElementById('btn-clear');
-  var canonicalProfile = document.getElementById('canonical-profile');
+  var canonicalCategory = document.getElementById('canonical-category');
   var canonicalUrlOutput = document.getElementById('canonical-url-output');
   var btnCopyCanonical = document.getElementById('btn-copy-canonical');
   var resultsSection = document.getElementById('results-section');
@@ -73,13 +73,6 @@
     // Profile filter (combobox)
     renderProfileOptions('');
 
-    // Canonical profile dropdown
-    profiles.forEach(function (p) {
-      var opt = document.createElement('option');
-      opt.value = p.id;
-      opt.textContent = p.id;
-      canonicalProfile.appendChild(opt);
-    });
   }
 
   // ===== DASHBOARD: RENDER PROFILE CARDS =====
@@ -378,6 +371,18 @@
         warningsContainer.appendChild(alertDiv);
       });
     }
+
+    // Scroll to results section
+    var resultsDivider = document.querySelector('.results-divider');
+    if (resultsDivider) {
+      setTimeout(function () {
+        var offset = 80; // Pixels to scroll above the target (adjust as needed)
+        var elementRect = resultsDivider.getBoundingClientRect();
+        var y = elementRect.top + window.scrollY - offset;
+
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      }, 50);
+    }
   });
 
   // Clear
@@ -430,10 +435,10 @@
   }
 
   // Canonical URL updater
-  canonicalProfile.addEventListener('change', updateCanonicalUrl);
+  canonicalCategory.addEventListener('change', updateCanonicalUrl);
   function updateCanonicalUrl() {
-    var slug = profileToSlug(canonicalProfile.value);
-    canonicalUrlOutput.textContent = 'Canonical Url: https://www.dell.com/' + slug + '/shop/deals/dc/';
+    var category = canonicalCategory.value;
+    canonicalUrlOutput.textContent = 'Canonical Url: https://www.dell.com/{l}-{c}/shop/deals/dc/' + category;
   }
 
   // Copy Canonical URL

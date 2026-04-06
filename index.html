@@ -149,10 +149,21 @@
 
       <!-- Canonical URL section -->
       <div class="canonical-section">
-        <label for="canonical-profile">Canonical URL Profile:</label>
-        <select id="canonical-profile"></select>
+        <label for="canonical-category">Canonical URL Category:</label>
+        <select id="canonical-category">
+          <option value="top-deals">top-deals</option>
+          <option value="clearance-deals">clearance-deals</option>
+          <option value="laptop-deals">laptop-deals</option>
+          <option value="desktop-deals">desktop-deals</option>
+          <option value="gaming-pc-deals">gaming-pc-deals</option>
+          <option value="computer-monitor-deals">computer-monitor-deals</option>
+          <option value="pc-accessories-deals">pc-accessories-deals</option>
+          <option value="business-deals">business-deals</option>
+          <option value="business-laptop-deals">business-laptop-deals</option>
+          <option value="business-desktop-deals">business-desktop-deals</option>
+        </select>
         <div class="canonical-url-display">
-          <code id="canonical-url-output">Canonical Url: https://www.dell.com/en-us/shop/deals/dc/</code>
+          <code id="canonical-url-output">Canonical Url: https://www.dell.com/{l}-{c}/shop/deals/dc/top-deals</code>
           <button class="btn btn-sm btn-ghost" id="btn-copy-canonical" title="Copy URL">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
               stroke-width="2">
@@ -190,6 +201,9 @@
             </button>
           </div>
 
+          <!-- Warnings container -->
+          <div id="warnings-container"></div>
+
           <!-- Differences table -->
           <div class="diff-table-wrapper">
             <table class="diff-table">
@@ -204,9 +218,6 @@
               <tbody id="diff-table-body"></tbody>
             </table>
           </div>
-
-          <!-- Warnings container -->
-          <div id="warnings-container"></div>
 
           <!-- jQuery scripts output -->
           <div class="script-block" id="scripts-output"></div>
