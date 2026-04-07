@@ -110,49 +110,28 @@
     <div class="page-header">
       <div class="page-header-inner">
         <h1>Comparison Tool</h1>
-        <p>Compare Content-Studio HTML with CMX fields and generate jQuery scripts</p>
+        <p>Compare Content-Studio data with CMX fields and generate jQuery scripts</p>
       </div>
     </div>
 
     <div class="compare-layout">
       <!-- Input section -->
       <div class="textarea-grid">
-        <!-- Content-Studio (left) — single textarea -->
-        <div class="field-group field-group-cs">
+        <div class="field-group">
           <div class="field-legend">
             <span class="legend-dot cs"></span>
             Content-Studio
           </div>
-          <textarea id="cs-textarea" class="field-textarea field-textarea-tall"
-            placeholder="Paste Content-Studio HTML source code here..."></textarea>
+          <textarea id="cs-textarea" class="field-textarea"
+            placeholder="Paste Content-Studio data here...&#10;&#10;Tab Name&#10;Summer Sale Deals&#10;Hero Subtitle&#10;Save big on tech&#10;..."></textarea>
         </div>
-
-        <!-- CMX (right) — 3 stacked textareas -->
-        <div class="cmx-fields-stack">
-          <div class="field-group">
-            <div class="field-legend">
-              <span class="legend-dot cmx"></span>
-              CMX — Main
-            </div>
-            <textarea id="cmx-main-textarea" class="field-textarea"
-              placeholder="Paste CMX Main section HTML here (leave empty to generate all scripts)..."></textarea>
+        <div class="field-group">
+          <div class="field-legend">
+            <span class="legend-dot cmx"></span>
+            CMX
           </div>
-          <div class="field-group">
-            <div class="field-legend">
-              <span class="legend-dot media"></span>
-              CMX — Media
-            </div>
-            <textarea id="cmx-media-textarea" class="field-textarea field-textarea-short"
-              placeholder="Paste CMX Media section HTML here (optional)..."></textarea>
-          </div>
-          <div class="field-group">
-            <div class="field-legend">
-              <span class="legend-dot imm"></span>
-              CMX — IMM
-            </div>
-            <textarea id="cmx-imm-textarea" class="field-textarea field-textarea-short"
-              placeholder="Paste CMX IMM section HTML here (optional)..."></textarea>
-          </div>
+          <textarea id="cmx-textarea" class="field-textarea"
+            placeholder="Paste CMX data here (leave empty to generate all scripts)...&#10;&#10;Display Name&#10;Summer Sale Deals&#10;Short Title&#10;Save big on tech&#10;..."></textarea>
         </div>
       </div>
 
@@ -225,67 +204,19 @@
           <!-- Warnings container -->
           <div id="warnings-container"></div>
 
-          <!-- MAIN differences group -->
-          <div class="results-group" id="results-group-main">
-            <div class="results-group-header">
-              <span class="legend-dot cmx"></span>
-              Main Fields
-            </div>
-            <div class="diff-table-wrapper">
-              <table class="diff-table">
-                <thead>
-                  <tr>
-                    <th>Content-Studio Field</th>
-                    <th>CMX Field</th>
-                    <th>CS Value</th>
-                    <th>CMX Value</th>
-                  </tr>
-                </thead>
-                <tbody id="diff-table-main"></tbody>
-              </table>
-            </div>
-          </div>
-
-          <!-- MEDIA differences group -->
-          <div class="results-group hidden" id="results-group-media">
-            <div class="results-group-header">
-              <span class="legend-dot media"></span>
-              Media Fields
-            </div>
-            <div class="diff-table-wrapper">
-              <table class="diff-table">
-                <thead>
-                  <tr>
-                    <th>Content-Studio Field</th>
-                    <th>CMX Field</th>
-                    <th>CS Value</th>
-                    <th>CMX Value</th>
-                  </tr>
-                </thead>
-                <tbody id="diff-table-media"></tbody>
-              </table>
-            </div>
-          </div>
-
-          <!-- IMM differences group -->
-          <div class="results-group hidden" id="results-group-imm">
-            <div class="results-group-header">
-              <span class="legend-dot imm"></span>
-              IMM Fields
-            </div>
-            <div class="diff-table-wrapper">
-              <table class="diff-table">
-                <thead>
-                  <tr>
-                    <th>Content-Studio Field</th>
-                    <th>CMX Field</th>
-                    <th>CS Value</th>
-                    <th>CMX Value</th>
-                  </tr>
-                </thead>
-                <tbody id="diff-table-imm"></tbody>
-              </table>
-            </div>
+          <!-- Differences table -->
+          <div class="diff-table-wrapper">
+            <table class="diff-table">
+              <thead>
+                <tr>
+                  <th>Content-Studio Field</th>
+                  <th>CMX Field</th>
+                  <th>CS Value</th>
+                  <th>CMX Value</th>
+                </tr>
+              </thead>
+              <tbody id="diff-table-body"></tbody>
+            </table>
           </div>
 
           <!-- jQuery scripts output -->

@@ -312,22 +312,19 @@ var COMPARISON_RULES = [
   { csLabel: 'SEO Meta Description', cmxLabel: 'SEO Description', templateType: 'tinymce-textarea' },
 ];
 
-// ===== MEDIA COMPARISON RULES =====
-// Compare image src URLs. No jQuery scripts — copy buttons only.
-var MEDIA_RULES = [
-  { csLabel: 'Source: DAM (1st image)', cmxLabel: 'Image Source (1st)', index: 0 },
-  { csLabel: 'Source: DAM (2nd image)', cmxLabel: 'Image Source (2nd)', index: 1 },
-];
-
-// ===== IMM COMPARISON RULES =====
-// templateType 'image' = no jQuery script, show copy button for the URL instead
-var IMM_RULES = [
-  { csLabel: 'Title',            cmxLabel: 'Title',            templateType: 'text-input' },
-  { csLabel: 'SubTitle',         cmxLabel: 'SubTitle',          templateType: 'text-input' },
-  { csLabel: 'Image Source',     cmxLabel: 'Image',             templateType: 'image' },
-  { csLabel: 'Caption',          cmxLabel: 'Caption',           templateType: 'text-input' },
-  { csLabel: 'Target URL',       cmxLabel: 'Target URL',        templateType: 'text-input' },
-  { csLabel: 'Text Theme',       cmxLabel: 'Text Theme',        templateType: 'select-dropdown' },
-  { csLabel: 'Background Color', cmxLabel: 'Background Color',  templateType: 'select-dropdown' },
-  { csLabel: 'Image Theme',      cmxLabel: 'Image Theme',       templateType: 'select-dropdown' },
+var MANUAL_FIELDS = [
+  {
+    csLabel: 'Hero Description',
+    csEndLabel: 'Hero Image',
+    cmxLabel: 'Description',
+    templateType: 'tinymce-textarea',
+    warningText: '"Description" ("Hero Description" on Content Studio) will be edited',
+  },
+  {
+    csLabel: 'Deal Great For Text',
+    csEndLabel: 'Page / Browser Title',
+    cmxLabel: 'Deal Great For Text',
+    templateType: 'tinymce-textarea',
+    warningText: '"Deal Great For Text" will be edited',
+  },
 ];
