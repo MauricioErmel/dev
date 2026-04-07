@@ -35,19 +35,92 @@ function generateJQueryScript(templateType, cmxLabel, origValue) {
   }
 }
 
+// ===== HTML PARSING UTILITIES =====
+
 /**
- * Parse plain text input (label on one line, value on the next)
- * Returns a Map of label → value
+ * Parse HTML source code into a label→value map.
+ * Looks for <label> elements and extracts values from their
+ * sibling/nearby input, select, or textarea elements.
+ * @param {string} html - raw HTML string
+ * @returns {object} map of { labelText: value }
  */
-function parseTextToMap(text) {
-  var lines = text.split('\n').map(function(line) { return line.replace(/\r$/, ''); });
+function parseHtmlToMap(html) {
+  if (!html || !html.trim()) return {};
+
+  var parser = new DOMParser();
+  var doc = parser.parseFromString(html, 'text/html');
   var map = {};
 
-  for (var i = 0; i < lines.length; i++) {
-    var trimmed = lines[i].trim();
-    if (trimmed !== '') {
-      var valueLine = (i + 1 < lines.length) ? lines[i + 1].trim() : '';
-      map[trimmed] = valueLine;
+  // Find all label elements
+  var labels = doc.querySelectorAll('label');
+  for (var i = 0; i < labels.length; i++) {
+    var labelEl = labels[i];
+    var labelText = labelEl.textContent.trim().replace(/\s+/g, ' ');
+    if (!labelText) continue;
+
+    // Try to find the associated form field
+    var container = labelEl.closest('.dds__form__field') ||
+                    labelEl.closest('.dds__select') ||
+                    labelEl.parentElement;
+
+    if (!container) continue;
+
+    var value = '';
+
+    // Try: input[type=text]
+    var input = container.querySelector('input[type="text"]');
+    if (input) {
+      value = input.getAttribute('value') || input.value || '';
+      map[labelText] = value;
+      continue;
+    }
+
+    // Try: select
+    var select = container.querySelector('select');
+    if (select) {
+      var selectedOpt = select.querySelector('option[selected]');
+      if (selectedOpt) {
+        value = selectedOpt.getAttribute('value') || selectedOpt.textContent.trim();
+      } else {
+        value = select.getAttribute('value') || '';
+      }
+      map[labelText] = value;
+      continue;
+    }
+
+    // Try: textarea (including tinymce)
+    var textarea = container.querySelector('textarea');
+    if (textarea) {
+      value = textarea.textContent || textarea.value || '';
+      map[labelText] = value;
+      continue;
+    }
+
+    // Try: iframe (tinymce rendered)
+    var iframe = container.querySelector('iframe');
+    if (iframe) {
+      // Can't access cross-origin iframe content via DOMParser,
+      // but the src attribute or data might contain relevant info
+      map[labelText] = '(iframe content)';
+      continue;
+    }
+
+    // Try: any input (hidden, etc)
+    var anyInput = container.querySelector('input');
+    if (anyInput) {
+      value = anyInput.getAttribute('value') || anyInput.value || '';
+      map[labelText] = value;
+      continue;
+    }
+
+    // If label for attribute is set, try by id
+    var forId = labelEl.getAttribute('for');
+    if (forId) {
+      var target = doc.getElementById(forId);
+      if (target) {
+        value = target.getAttribute('value') || target.textContent || '';
+        map[labelText] = value;
+      }
     }
   }
 
@@ -55,57 +128,88 @@ function parseTextToMap(text) {
 }
 
 /**
- * Get the value between two labels in the raw text
- * (for manual-copy fields like Hero Description)
+ * Extract image src URLs from HTML source code.
+ * @param {string} html - raw HTML string
+ * @param {string} mode - 'cs' for Content-Studio, 'cmx' for CMX
+ * @returns {string[]} array of src URLs (1st and 2nd occurrences)
  */
-function getValueBetweenLabels(text, startLabel, endLabel) {
-  var lines = text.split('\n').map(function(line) { return line.replace(/\r$/, ''); });
-  var startIndex = -1;
-  var endIndex = lines.length;
+function extractSrcUrls(html, mode) {
+  if (!html || !html.trim()) return [];
 
-  for (var i = 0; i < lines.length; i++) {
-    var trimmed = lines[i].trim();
-    if (trimmed === startLabel) {
-      startIndex = i;
+  var urls = [];
+
+  if (mode === 'cs') {
+    // Content-Studio: find src= values that appear after "Source: DAM"
+    // Pattern: Source: DAM" src="URL"
+    var damRegex = /Source:\s*DAM["'][^"']*["']\s*src=["']([^"']+)["']/gi;
+    var match;
+    while ((match = damRegex.exec(html)) !== null) {
+      urls.push(match[1]);
     }
-    if (trimmed === endLabel && startIndex !== -1) {
-      endIndex = i;
-      break;
+
+    // Fallback: try simpler pattern if the above didn't match
+    if (urls.length === 0) {
+      // Try: look for src= after any "Source: DAM" text
+      var parts = html.split(/Source:\s*DAM/gi);
+      for (var i = 1; i < parts.length; i++) {
+        var srcMatch = parts[i].match(/src=["']([^"']+)["']/i);
+        if (srcMatch) {
+          urls.push(srcMatch[1]);
+        }
+      }
+    }
+  } else {
+    // CMX: find all src= from img tags
+    var parser = new DOMParser();
+    var doc = parser.parseFromString(html, 'text/html');
+    var imgs = doc.querySelectorAll('img[src]');
+    for (var j = 0; j < imgs.length; j++) {
+      var src = imgs[j].getAttribute('src');
+      if (src && src.trim()) {
+        urls.push(src.trim());
+      }
+    }
+
+    // Fallback: regex for src= attributes in raw HTML
+    if (urls.length === 0) {
+      var imgRegex = /src=["']([^"']+)["']/gi;
+      var m;
+      while ((m = imgRegex.exec(html)) !== null) {
+        urls.push(m[1]);
+      }
     }
   }
 
-  if (startIndex === -1) return null;
-
-  var valueLines = [];
-  for (var j = startIndex + 1; j < endIndex; j++) {
-    var t = lines[j].trim();
-    if (t !== '') {
-      valueLines.push(t);
-    }
-  }
-
-  return valueLines.length > 0 ? valueLines.join('\n') : null;
+  return urls;
 }
 
 /**
- * Main comparison function
- * @param {string} csText - Content-Studio raw text
- * @param {string} cmxText - CMX raw text (can be empty)
- * @returns {{ scripts: string[], warnings: string[], differences: object[] }}
+ * Main comparison function.
+ * Parses HTML from Content-Studio and up to 3 CMX sections (Main, Media, IMM).
+ * Only compares sections where the CMX textarea has content.
+ *
+ * @param {string} csHtml - Content-Studio HTML source
+ * @param {string} cmxMainHtml - CMX Main section HTML (can be empty)
+ * @param {string} cmxMediaHtml - CMX Media section HTML (can be empty)
+ * @param {string} cmxImmHtml - CMX IMM section HTML (can be empty)
+ * @returns {{ scripts: string[], warnings: string[], mainDiffs: object[], mediaDiffs: object[], immDiffs: object[] }}
  */
-function compareTexts(csText, cmxText) {
-  var csMap = parseTextToMap(csText);
-  var cmxMap = parseTextToMap(cmxText);
-  var isCmxEmpty = cmxText.trim() === '';
-
+function compareAll(csHtml, cmxMainHtml, cmxMediaHtml, cmxImmHtml) {
+  var csMap = parseHtmlToMap(csHtml);
   var scripts = [];
-  var differences = [];
+  var warnings = [];
+  var mainDiffs = [];
+  var mediaDiffs = [];
+  var immDiffs = [];
 
-  // Check each comparison rule
+  // ===== MAIN SECTION =====
+  var cmxMainMap = parseHtmlToMap(cmxMainHtml);
+  var isCmxMainEmpty = !cmxMainHtml || !cmxMainHtml.trim();
+
   for (var i = 0; i < COMPARISON_RULES.length; i++) {
     var rule = COMPARISON_RULES[i];
     var csValue = csMap[rule.csLabel];
-    var cmxValue = cmxMap[rule.cmxLabel];
+    var cmxValue = cmxMainMap[rule.cmxLabel];
 
     var isCsEmpty = (csValue === undefined || csValue === '');
     var needsUpdate = false;
@@ -114,7 +218,7 @@ function compareTexts(csText, cmxText) {
     if (isCsEmpty) {
       needsUpdate = false;
       matchReason = 'Empty in Content-Studio';
-    } else if (isCmxEmpty || cmxValue === undefined || csValue !== cmxValue) {
+    } else if (isCmxMainEmpty || cmxValue === undefined || csValue !== cmxValue) {
       needsUpdate = true;
     } else {
       needsUpdate = false;
@@ -128,7 +232,7 @@ function compareTexts(csText, cmxText) {
       }
     }
 
-    differences.push({
+    mainDiffs.push({
       csLabel: rule.csLabel,
       cmxLabel: rule.cmxLabel,
       csValue: csValue || '(empty)',
@@ -138,46 +242,92 @@ function compareTexts(csText, cmxText) {
     });
   }
 
-  // Check manual-copy fields (generate scripts + differences + warnings)
-  var warnings = [];
-  for (var j = 0; j < MANUAL_FIELDS.length; j++) {
-    var field = MANUAL_FIELDS[j];
-    var csVal = getValueBetweenLabels(csText, field.csLabel, field.csEndLabel);
-    var cmxVal = cmxMap[field.cmxLabel];
+  // ===== MEDIA SECTION =====
+  var hasMedia = cmxMediaHtml && cmxMediaHtml.trim();
+  if (hasMedia) {
+    var csSrcUrls = extractSrcUrls(csHtml, 'cs');
+    var cmxSrcUrls = extractSrcUrls(cmxMediaHtml, 'cmx');
 
-    var isCsEmpty = (csVal === null || csVal === '');
-    var needsUpdate = false;
-    var matchReason = '';
+    for (var m = 0; m < MEDIA_RULES.length; m++) {
+      var mediaRule = MEDIA_RULES[m];
+      var csUrl = csSrcUrls[mediaRule.index] || '';
+      var cmxUrl = cmxSrcUrls[mediaRule.index] || '';
 
-    if (isCsEmpty) {
-      needsUpdate = false;
-      matchReason = 'Empty in Content-Studio';
-    } else if (isCmxEmpty || cmxVal === undefined || csVal !== cmxVal) {
-      needsUpdate = true;
-    } else {
-      needsUpdate = false;
-      matchReason = 'Values match';
-    }
+      var isCsUrlEmpty = !csUrl;
+      var needsMediaUpdate = false;
+      var mediaMatchReason = '';
 
-    if (needsUpdate) {
-      // Generate jQuery script
-      var manualScript = generateJQueryScript(field.templateType, field.cmxLabel, csVal);
-      if (manualScript) {
-        scripts.push(manualScript);
+      if (isCsUrlEmpty) {
+        needsMediaUpdate = false;
+        mediaMatchReason = 'Empty in Content-Studio';
+      } else if (!cmxUrl || csUrl !== cmxUrl) {
+        needsMediaUpdate = true;
+      } else {
+        needsMediaUpdate = false;
+        mediaMatchReason = 'Values match';
       }
-      // Keep warning
-      warnings.push(field.warningText);
+
+      mediaDiffs.push({
+        csLabel: mediaRule.csLabel,
+        cmxLabel: mediaRule.cmxLabel,
+        csValue: csUrl || '(empty)',
+        cmxValue: cmxUrl || '(empty)',
+        needsUpdate: needsMediaUpdate,
+        matchReason: mediaMatchReason,
+        isImage: true
+      });
     }
-    
-    differences.push({
-      csLabel: field.csLabel,
-      cmxLabel: field.cmxLabel,
-      csValue: csVal || '(empty)',
-      cmxValue: cmxVal || '(empty)',
-      needsUpdate: needsUpdate,
-      matchReason: matchReason
-    });
   }
 
-  return { scripts: scripts, warnings: warnings, differences: differences };
+  // ===== IMM SECTION =====
+  var hasImm = cmxImmHtml && cmxImmHtml.trim();
+  if (hasImm) {
+    var cmxImmMap = parseHtmlToMap(cmxImmHtml);
+
+    for (var k = 0; k < IMM_RULES.length; k++) {
+      var immRule = IMM_RULES[k];
+      var csImmValue = csMap[immRule.csLabel];
+      var cmxImmValue = cmxImmMap[immRule.cmxLabel];
+
+      var isCsImmEmpty = (csImmValue === undefined || csImmValue === '');
+      var needsImmUpdate = false;
+      var immMatchReason = '';
+
+      if (isCsImmEmpty) {
+        needsImmUpdate = false;
+        immMatchReason = 'Empty in Content-Studio';
+      } else if (cmxImmValue === undefined || csImmValue !== cmxImmValue) {
+        needsImmUpdate = true;
+      } else {
+        needsImmUpdate = false;
+        immMatchReason = 'Values match';
+      }
+
+      // Generate jQuery script only for non-image fields
+      if (needsImmUpdate && immRule.templateType !== 'image') {
+        var immScript = generateJQueryScript(immRule.templateType, immRule.cmxLabel, csImmValue);
+        if (immScript) {
+          scripts.push(immScript);
+        }
+      }
+
+      immDiffs.push({
+        csLabel: immRule.csLabel,
+        cmxLabel: immRule.cmxLabel,
+        csValue: csImmValue || '(empty)',
+        cmxValue: cmxImmValue || '(empty)',
+        needsUpdate: needsImmUpdate,
+        matchReason: immMatchReason,
+        isImage: immRule.templateType === 'image'
+      });
+    }
+  }
+
+  return {
+    scripts: scripts,
+    warnings: warnings,
+    mainDiffs: mainDiffs,
+    mediaDiffs: mediaDiffs,
+    immDiffs: immDiffs
+  };
 }

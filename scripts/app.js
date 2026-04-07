@@ -26,7 +26,9 @@
 
   // Comparison Tool elements
   var csTextarea = document.getElementById('cs-textarea');
-  var cmxTextarea = document.getElementById('cmx-textarea');
+  var cmxMainTextarea = document.getElementById('cmx-main-textarea');
+  var cmxMediaTextarea = document.getElementById('cmx-media-textarea');
+  var cmxImmTextarea = document.getElementById('cmx-imm-textarea');
   var btnCompare = document.getElementById('btn-compare');
   var btnClear = document.getElementById('btn-clear');
   var canonicalCategory = document.getElementById('canonical-category');
@@ -36,7 +38,12 @@
   var alertSuccess = document.getElementById('alert-success');
   var diffContainer = document.getElementById('diff-container');
   var diffCountText = document.getElementById('diff-count-text');
-  var diffTableBody = document.getElementById('diff-table-body');
+  var diffTableMain = document.getElementById('diff-table-main');
+  var diffTableMedia = document.getElementById('diff-table-media');
+  var diffTableImm = document.getElementById('diff-table-imm');
+  var resultsGroupMain = document.getElementById('results-group-main');
+  var resultsGroupMedia = document.getElementById('results-group-media');
+  var resultsGroupImm = document.getElementById('results-group-imm');
   var scriptsOutput = document.getElementById('scripts-output');
   var warningsContainer = document.getElementById('warnings-container');
   var btnCopyScripts = document.getElementById('btn-copy-scripts');
@@ -294,20 +301,126 @@
 
   csTextarea.addEventListener('input', updateCompareButton);
 
+  /**
+   * Build a diff table row. If isImage=true, values get inline copy buttons.
+   */
+  function buildDiffRow(diff) {
+    var tr = document.createElement('tr');
+    if (!diff.needsUpdate) {
+      tr.className = 'row-no-update';
+    }
+    var noUpdateBadge = !diff.needsUpdate
+      ? ' <span class="badge-no-update" title="' + escapeAttr(diff.matchReason) + '">No Update</span>'
+      : '';
+
+    var csCell, cmxCell;
+
+    if (diff.isImage && diff.csValue !== '(empty)') {
+      csCell = '<td class="col-cs-value"><div class="col-value-copyable"><span title="' + escapeAttr(diff.csValue) + '">' + escapeHtml(diff.csValue) + '</span><button class="btn-copy-url" data-url="' + escapeAttr(diff.csValue) + '" title="Copy URL">📋</button></div></td>';
+    } else {
+      csCell = '<td class="col-cs-value" title="' + escapeAttr(diff.csValue) + '">' + escapeHtml(diff.csValue) + '</td>';
+    }
+
+    if (diff.isImage && diff.cmxValue !== '(empty)') {
+      cmxCell = '<td class="col-cmx-value"><div class="col-value-copyable"><span title="' + escapeAttr(diff.cmxValue) + '">' + escapeHtml(diff.cmxValue) + '</span><button class="btn-copy-url" data-url="' + escapeAttr(diff.cmxValue) + '" title="Copy URL">📋</button></div></td>';
+    } else {
+      cmxCell = '<td class="col-cmx-value" title="' + escapeAttr(diff.cmxValue) + '">' + escapeHtml(diff.cmxValue) + '</td>';
+    }
+
+    tr.innerHTML =
+      '<td class="col-label">' + escapeHtml(diff.csLabel) + noUpdateBadge + '</td>' +
+      '<td>' + escapeHtml(diff.cmxLabel) + '</td>' +
+      csCell + cmxCell;
+
+    return tr;
+  }
+
+  /**
+   * Populate a tbody element with diff rows.
+   */
+  function populateDiffTable(tbody, diffs) {
+    tbody.innerHTML = '';
+    diffs.forEach(function (diff) {
+      tbody.appendChild(buildDiffRow(diff));
+    });
+  }
+
+  /**
+   * Attach click handlers to all .btn-copy-url buttons within a container.
+   */
+  function attachCopyUrlHandlers(container) {
+    var buttons = container.querySelectorAll('.btn-copy-url');
+    for (var i = 0; i < buttons.length; i++) {
+      buttons[i].addEventListener('click', function () {
+        var url = this.getAttribute('data-url');
+        var btn = this;
+        copyUrlToClipboard(url, btn);
+      });
+    }
+  }
+
+  /**
+   * Copy a URL to clipboard and flash feedback on the button.
+   */
+  function copyUrlToClipboard(url, buttonEl) {
+    function showFeedback() {
+      var original = buttonEl.textContent;
+      buttonEl.classList.add('copied');
+      buttonEl.textContent = '✓';
+      setTimeout(function () {
+        buttonEl.classList.remove('copied');
+        buttonEl.textContent = original;
+      }, 1500);
+    }
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(showFeedback).catch(function () {
+        fallbackCopyText(url);
+        showFeedback();
+      });
+    } else {
+      fallbackCopyText(url);
+      showFeedback();
+    }
+  }
+
+  function fallbackCopyText(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  }
+
   // Compare
   btnCompare.addEventListener('click', function () {
     if (!csTextarea.value.trim()) return;
 
-    var result = compareTexts(csTextarea.value, cmxTextarea.value);
+    var result = compareAll(
+      csTextarea.value,
+      cmxMainTextarea.value,
+      cmxMediaTextarea.value,
+      cmxImmTextarea.value
+    );
 
     // Show results section
     resultsSection.classList.remove('hidden');
 
     var hasScripts = result.scripts.length > 0;
     var hasWarnings = result.warnings.length > 0;
+    var hasMediaDiffs = result.mediaDiffs.length > 0;
+    var hasImmDiffs = result.immDiffs.length > 0;
+
+    // Count total fields needing update
+    var allDiffs = result.mainDiffs.concat(result.mediaDiffs).concat(result.immDiffs);
+    var totalFields = allDiffs.length;
+    var fieldsToUpdate = allDiffs.filter(function (d) { return d.needsUpdate; }).length;
 
     // Success alert
-    if (!hasScripts && !hasWarnings) {
+    if (fieldsToUpdate === 0) {
       alertSuccess.classList.remove('hidden');
     } else {
       alertSuccess.classList.add('hidden');
@@ -315,24 +428,32 @@
 
     // Always show differences breakdown
     diffContainer.classList.remove('hidden');
-    var fieldsToUpdate = result.differences.filter(function (d) { return d.needsUpdate; }).length;
-    diffCountText.textContent = fieldsToUpdate + ' field' + (fieldsToUpdate !== 1 ? 's' : '') + ' need updating out of 11:';
+    diffCountText.textContent = fieldsToUpdate + ' field' + (fieldsToUpdate !== 1 ? 's' : '') + ' need updating out of ' + totalFields + ':';
 
-    // Build table rows
-    diffTableBody.innerHTML = '';
-    result.differences.forEach(function (diff) {
-      var tr = document.createElement('tr');
-      if (!diff.needsUpdate) {
-        tr.className = 'row-no-update';
-      }
-      var noUpdateBadge = !diff.needsUpdate ? ' <span class="badge-no-update" title="' + escapeAttr(diff.matchReason) + '">No Update</span>' : '';
-      tr.innerHTML =
-        '<td class="col-label">' + escapeHtml(diff.csLabel) + noUpdateBadge + '</td>' +
-        '<td>' + escapeHtml(diff.cmxLabel) + '</td>' +
-        '<td class="col-cs-value" title="' + escapeAttr(diff.csValue) + '">' + escapeHtml(diff.csValue) + '</td>' +
-        '<td class="col-cmx-value" title="' + escapeAttr(diff.cmxValue) + '">' + escapeHtml(diff.cmxValue) + '</td>';
-      diffTableBody.appendChild(tr);
-    });
+    // === MAIN section (always shown) ===
+    resultsGroupMain.classList.remove('hidden');
+    populateDiffTable(diffTableMain, result.mainDiffs);
+    attachCopyUrlHandlers(resultsGroupMain);
+
+    // === MEDIA section ===
+    if (hasMediaDiffs) {
+      resultsGroupMedia.classList.remove('hidden');
+      populateDiffTable(diffTableMedia, result.mediaDiffs);
+      attachCopyUrlHandlers(resultsGroupMedia);
+    } else {
+      resultsGroupMedia.classList.add('hidden');
+      diffTableMedia.innerHTML = '';
+    }
+
+    // === IMM section ===
+    if (hasImmDiffs) {
+      resultsGroupImm.classList.remove('hidden');
+      populateDiffTable(diffTableImm, result.immDiffs);
+      attachCopyUrlHandlers(resultsGroupImm);
+    } else {
+      resultsGroupImm.classList.add('hidden');
+      diffTableImm.innerHTML = '';
+    }
 
     // Handle scripts
     if (hasScripts) {
@@ -376,10 +497,9 @@
     var resultsDivider = document.querySelector('.results-divider');
     if (resultsDivider) {
       setTimeout(function () {
-        var offset = 80; // Pixels to scroll above the target (adjust as needed)
+        var offset = 80;
         var elementRect = resultsDivider.getBoundingClientRect();
         var y = elementRect.top + window.scrollY - offset;
-
         window.scrollTo({ top: y, behavior: 'smooth' });
       }, 50);
     }
@@ -388,7 +508,9 @@
   // Clear
   btnClear.addEventListener('click', function () {
     csTextarea.value = '';
-    cmxTextarea.value = '';
+    cmxMainTextarea.value = '';
+    cmxMediaTextarea.value = '';
+    cmxImmTextarea.value = '';
     resultsSection.classList.add('hidden');
     updateCompareButton();
   });

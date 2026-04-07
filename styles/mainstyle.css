@@ -620,12 +620,20 @@ body {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
+  align-items: start;
 }
 
 .field-group {
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
+}
+
+
+.cmx-fields-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
 .field-legend {
@@ -650,9 +658,17 @@ body {
   background: var(--secondary);
 }
 
+.legend-dot.media {
+  background: #f59e0b;
+}
+
+.legend-dot.imm {
+  background: #ec4899;
+}
+
 .field-textarea {
   width: 100%;
-  height: 18rem;
+  height: 12rem;
   padding: 0.75rem;
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -663,6 +679,14 @@ body {
   background: var(--bg-surface);
   resize: vertical;
   transition: border-color 0.2s;
+}
+
+.field-textarea-tall {
+  height: 28rem;
+}
+
+.field-textarea-short {
+  height: 8rem;
 }
 
 .field-textarea:focus {
@@ -858,6 +882,66 @@ body {
   margin-bottom: 1rem;
 }
 
+/* Results group sections (Main / Media / IMM) */
+.results-group {
+  margin-bottom: 1.25rem;
+}
+
+.results-group-header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid var(--border-light);
+}
+
+/* Copyable value cell (for image URLs) */
+.col-value-copyable {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.col-value-copyable span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 10rem;
+}
+
+.btn-copy-url {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.15rem 0.3rem;
+  border: 1px solid var(--border);
+  border-radius: 0.25rem;
+  background: var(--bg-surface);
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.65rem;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.btn-copy-url:hover {
+  background: var(--bg-surface-2);
+  color: var(--text);
+  border-color: var(--primary);
+}
+
+.btn-copy-url.copied {
+  background: var(--success);
+  color: #fff;
+  border-color: var(--success);
+}
+
 /* Differences header */
 .diff-header {
   display: flex;
@@ -1007,6 +1091,10 @@ body {
 
   .textarea-grid {
     grid-template-columns: 1fr;
+  }
+
+  .field-textarea-tall {
+    height: 18rem;
   }
 
   .profile-grid {
