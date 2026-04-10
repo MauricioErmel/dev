@@ -1,0 +1,84 @@
+
+Content 
+Pages & Web Parts 
+Metadata 
+Help 
+Operations 
+Administration 
+Digital Assets 
+My Stuff
+Collaboration Studio
+Translation Studio
+
+Global Search
+mauricio_ermel
+Collection
+Dashboard
+Details
+top-pc-deals
+ 
+- (ja/jp)
+|
+SEOFAQContent
+
+Summary
+
+Primary
+
+Others
+DellProductCategoryLookup:(Required)
+top-pc-deals
+Name:(Required)
+ top-pc-deals 
+Profile
+:(Required)
+ja/jp
+Segments:(Required)
+bsd || Small and Medium Business
+Application Variation:(Required)
+Usage Code:(Required)
+all-products
+Standardize RefinementId Id:(Required)
+TabLevel
+Refinement Id
+ 0 
+Title
+ 今週のおすすめ製品の詳細情報 
+Description
+最高品質のテクノロジー製品を幅広く取り揃えた、Dellのお得な今週のおすすめ製品をぜひご覧ください。最先端のノートパソコンでもパワフルなデスクトップでも、お探しのものがきっと見つかります。
+
+Dellの今週のおすすめ製品では、お得なパソコンや基本的な周辺機器類を幅広く取り揃えています。美しいビジュアルを提供するモニター、快適さと精度を追求して最適化されたキーボードとマウス、臨場感あふれる音質を実現するオーディオ ソリューションで、作業環境を強化しましょう。
+Header
+ よくある質問(FAQ)： 
+
+4FAQ Items
+Search
+
+(SEOFAQItem) おすすめ製品の購入にメンバーシップ割引を適用できますか？
+FAQ Question
+ おすすめ製品の購入にメンバーシップ割引を適用できますか？ 
+Description
+一部の製品に例外が適用される場合がありますが、学割やお取引先従業員様向け割引などのメンバー割引は、おすすめ製品の購入に適用できます。ご購入前に、適用される可能性のある特定の例外について、製品の詳細ページをご確認ください。特別割引の詳細については、メンバーシップ プログラムをご覧ください。
+
+(SEOFAQItem) おすすめ製品の購入でDell Rewardsポイントの獲得や引き換えはできますか？
+FAQ Question
+ おすすめ製品の購入でDell Rewardsポイントの獲得や引き換えはできますか？ 
+Description
+はい。すべてのおすすめ製品について、Dell Rewardsポイントの獲得と引き換えができます。Dell Rewardsにアクセスして、報酬の獲得方法と引き換え方法をご確認ください。
+
+(SEOFAQItem) おすすめ製品に対して、サポート サービスと保証は提供されていますか？
+FAQ Question
+ おすすめ製品に対して、サポート サービスと保証は提供されていますか？ 
+Description
+はい。おすすめ製品は、サポート サービスと保証をご利用いただけます。ただし、サポート サービスや保証のおすすめや特別割引は、製品によって異なる場合があります。詳細については、「サポート サービスと保証」をご参照ください。
+
+(SEOFAQItem) おすすめ製品に配送料はかかりますか？
+FAQ Question
+ おすすめ製品に配送料はかかりますか？ 
+Description
+いいえ。おすすめ製品をはじめ、当社におけるすべての製品の表示価格は、配送料込の価格です。必要な最低購入額はありません。
+Version 3.0   Last Modified at 11/03/2026 05:58 AM by asia-pacific\jing_yee
+Published Version 3.0 From Immediate To Never Last Published at 11/03/2026 05:59 AM by asia-pacific\jing_yee
+ Local Time
+© 2023 Dell.
+® All Rights Reserved.

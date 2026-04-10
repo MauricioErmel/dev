@@ -9,6 +9,19 @@
   <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
   <title>DMC Manager</title>
   <link rel="stylesheet" href="styles/mainstyle.css">
+  <style>
+    .div-textarea:empty:before {
+      content: attr(data-placeholder);
+      color: #999;
+      white-space: pre-wrap;
+      pointer-events: none;
+    }
+    .div-textarea {
+      overflow-y: auto;
+      white-space: pre-wrap;
+      min-height: 150px;
+    }
+  </style>
 </head>
 
 <body>
@@ -149,16 +162,16 @@
             <span class="legend-dot cs"></span>
             Content-Studio
           </div>
-          <textarea id="cs-textarea" class="field-textarea"
-            placeholder="Paste Content-Studio data here...&#10;&#10;Tab Name&#10;Summer Sale Deals&#10;Hero Subtitle&#10;Save big on tech&#10;..."></textarea>
+          <div id="cs-textarea" class="field-textarea div-textarea" contenteditable="true"
+            data-placeholder="Paste Content-Studio data here...&#10;&#10;Tab Name&#10;Summer Sale Deals&#10;Hero Subtitle&#10;Save big on tech&#10;..."></div>
         </div>
         <div class="field-group">
           <div class="field-legend">
             <span class="legend-dot cmx"></span>
             CMX
           </div>
-          <textarea id="cmx-textarea" class="field-textarea"
-            placeholder="Paste CMX data here (leave empty to generate all scripts)...&#10;&#10;Display Name&#10;Summer Sale Deals&#10;Short Title&#10;Save big on tech&#10;..."></textarea>
+          <div id="cmx-textarea" class="field-textarea div-textarea" contenteditable="true"
+            data-placeholder="Paste CMX data here (leave empty to generate all scripts)...&#10;&#10;Display Name&#10;Summer Sale Deals&#10;Short Title&#10;Save big on tech&#10;..."></div>
         </div>
       </div>
 
