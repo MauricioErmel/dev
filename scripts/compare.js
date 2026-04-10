@@ -42,7 +42,7 @@ function generateJQueryScript(templateType, cmxLabel, origValue, index) {
  * Returns a Map of label → value
  */
 function parseTextToMap(text) {
-  var lines = text.split('\n').map(function(line) { return line.replace(/\r$/, ''); });
+  var lines = text.split('\n').map(function (line) { return line.replace(/\r$/, ''); });
   var map = {};
 
   for (var i = 0; i < lines.length; i++) {
@@ -61,7 +61,7 @@ function parseTextToMap(text) {
  * (for manual-copy fields like Hero Description)
  */
 function getValueBetweenLabels(text, startLabel, endLabel) {
-  var lines = text.split('\n').map(function(line) { return line.replace(/\r$/, ''); });
+  var lines = text.split('\n').map(function (line) { return line.replace(/\r$/, ''); });
   var startIndex = -1;
   var endIndex = lines.length;
 
@@ -170,7 +170,7 @@ function compareTexts(csText, cmxText) {
       // Keep warning
       warnings.push(field.warningText);
     }
-    
+
     differences.push({
       csLabel: field.csLabel,
       cmxLabel: field.cmxLabel,
@@ -188,15 +188,15 @@ function compareTexts(csText, cmxText) {
  * Parse Content Studio FAQ plain text into head and items array
  */
 function parseCsFaq(text) {
-  var lines = text.split('\n').map(function(line) { return line.replace(/\r$/, ''); });
+  var lines = text.split('\n').map(function (line) { return line.replace(/\r$/, ''); });
   var head = { title: '', description: '', header: '' };
   var items = [];
   var state = 'search_head';
-  
+
   for (var i = 0; i < lines.length; i++) {
     var line = lines[i].trim();
     if (!line) continue;
-    
+
     if (state === 'search_head') {
       if (line === 'Title') {
         head.title = lines[++i] ? lines[i].trim() : '';
@@ -215,8 +215,8 @@ function parseCsFaq(text) {
         var descLines = [];
         var j = i + 1;
         while (j < lines.length && lines[j].trim() !== 'FAQ Question' && !lines[j].trim().startsWith('(SEOFAQItem)') && !lines[j].trim().startsWith('Version')) {
-            if (lines[j].trim()) descLines.push(lines[j].trim());
-            j++;
+          if (lines[j].trim()) descLines.push(lines[j].trim());
+          j++;
         }
         items[items.length - 1].description = descLines.join('\n');
         i = j - 1;
@@ -230,15 +230,15 @@ function parseCsFaq(text) {
  * Parse CMX FAQ plain text into head and items array
  */
 function parseCmxFaq(text) {
-  var lines = text.split('\n').map(function(line) { return line.replace(/\r$/, ''); });
+  var lines = text.split('\n').map(function (line) { return line.replace(/\r$/, ''); });
   var head = { title: '', description: '', header: '' };
   var items = [];
   var state = 'search_head';
-  
+
   for (var i = 0; i < lines.length; i++) {
     var line = lines[i].trim();
     if (!line) continue;
-    
+
     if (state === 'search_head') {
       if (line === 'Title') {
         head.title = lines[++i] ? lines[i].trim() : '';
@@ -248,8 +248,8 @@ function parseCmxFaq(text) {
         var descLines = [];
         var j = i + 1;
         while (j < lines.length && lines[j].trim() !== 'SEO FAQ' && lines[j].trim() !== 'Question') {
-            if (lines[j].trim()) descLines.push(lines[j].trim());
-            j++;
+          if (lines[j].trim()) descLines.push(lines[j].trim());
+          j++;
         }
         head.description = descLines.join('\n');
         i = j - 1;
@@ -264,15 +264,15 @@ function parseCmxFaq(text) {
         var descLines = [];
         var j = i + 1;
         while (j < lines.length && lines[j].trim() !== 'Question' && !lines[j].trim().startsWith('Version') && !lines[j].trim().startsWith('© ')) {
-            if (lines[j].trim()) descLines.push(lines[j].trim());
-            j++;
+          if (lines[j].trim()) descLines.push(lines[j].trim());
+          j++;
         }
         items[items.length - 1].description = descLines.join('\n');
         i = j - 1;
       }
     }
   }
-  
+
   return { head: head, items: items };
 }
 
@@ -283,11 +283,11 @@ function compareFaqTexts(csText, cmxText) {
   var csData = parseCsFaq(csText);
   var cmxData = parseCmxFaq(cmxText);
   var isCmxEmpty = cmxText.trim() === '';
-  
+
   var scripts = [];
   var warnings = [];
   var differences = [];
-  
+
   // 1. Check questions count
   if (!isCmxEmpty) {
     if (csData.items.length > cmxData.items.length) {
@@ -298,7 +298,7 @@ function compareFaqTexts(csText, cmxText) {
       warnings.push("Content-Studio has " + diff + " question" + (diff > 1 ? "s" : "") + " fewer than CMX.");
     }
   } else {
-     warnings.push("CMX text is empty, generating all scripts for " + csData.items.length + " FAQ items.");
+    warnings.push("CMX text is empty, generating all scripts for " + csData.items.length + " FAQ items.");
   }
 
   function pushDiff(csLabel, cmxLabel, csValue, cmxValue, templateType, index) {
@@ -332,20 +332,20 @@ function compareFaqTexts(csText, cmxText) {
       matchReason: matchReason
     });
   }
-  
+
   // 2. Compare Header
   pushDiff('Title', 'Title', csData.head.title, cmxData.head.title, 'text-input', null);
   pushDiff('Header', 'Header', csData.head.header, cmxData.head.header, 'text-input', null);
   pushDiff('Description (Header)', 'SEO Description', csData.head.description, cmxData.head.description, 'tinymce-textarea', 0);
-  
+
   // 3. Compare Items
   for (var i = 0; i < csData.items.length; i++) {
     var csItem = csData.items[i];
     var cmxItem = cmxData.items[i] || { question: '', description: '' };
-    
-    pushDiff('FAQ Question ' + (i+1), 'Question', csItem.question, cmxItem.question, 'text-input', i);
-    pushDiff('FAQ Description ' + (i+1), 'SEO Description', csItem.description, cmxItem.description, 'tinymce-textarea', i + 1);
+
+    pushDiff('FAQ Question ' + (i + 1), 'Question', csItem.question, cmxItem.question, 'text-input', i);
+    pushDiff('FAQ Description ' + (i + 1), 'SEO Description', csItem.description, cmxItem.description, 'tinymce-textarea', i + 1);
   }
-  
+
   return { scripts: scripts, warnings: warnings, differences: differences };
 }

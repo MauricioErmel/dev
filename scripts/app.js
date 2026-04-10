@@ -52,13 +52,13 @@
   // ===== NAVIGATION =====
   function switchMainTab(tabId) {
     currentMainTab = tabId;
-    mainTabs.forEach(function(tab) {
+    mainTabs.forEach(function (tab) {
       tab.classList.toggle('active', tab.getAttribute('data-main-tab') === tabId);
     });
-    
+
     // Update dashboard content
     renderDashboard();
-    
+
     // Update comparison tool visibility
     if (tabId === 'category') {
       compareContent.classList.remove('hidden');
@@ -80,7 +80,7 @@
 
   function switchSubTab(subTabId) {
     currentSubTab = subTabId;
-    subTabs.forEach(function(tab) {
+    subTabs.forEach(function (tab) {
       tab.classList.toggle('active', tab.getAttribute('data-sub-tab') === subTabId);
     });
 
@@ -88,14 +88,14 @@
     pageCompare.classList.toggle('active', subTabId === 'compare');
   }
 
-  mainTabs.forEach(function(tab) {
-    tab.addEventListener('click', function() {
+  mainTabs.forEach(function (tab) {
+    tab.addEventListener('click', function () {
       switchMainTab(this.getAttribute('data-main-tab'));
     });
   });
 
-  subTabs.forEach(function(tab) {
-    tab.addEventListener('click', function() {
+  subTabs.forEach(function (tab) {
+    tab.addEventListener('click', function () {
       switchSubTab(this.getAttribute('data-sub-tab'));
     });
   });
