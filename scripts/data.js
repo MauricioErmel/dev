@@ -278,6 +278,72 @@ var PROFILE_URLS = {
   },
 };
 
+// IMM Profiles URLs
+var IMM_PROFILE_URLS = {
+  'ja/jp': {
+    'business-laptop-deals': 'https://cmxtools.dell.com/content?collectionid=af168bc2-6722-48d0-9147-c4edbdbd5f8e&formtype=item&id=ae0fbea9-fd60-4710-82a1-cf365ff2fa57&key=business-laptop-deals',
+    'business-desktop-deals': 'https://cmxtools.dell.com/content?collectionid=af168bc2-6722-48d0-9147-c4edbdbd5f8e&formtype=item&id=033fec63-0b64-4117-ab41-524f328bba66&key=business-desktop-deals',
+    'business-deals': 'https://cmxtools.dell.com/content?collectionid=af168bc2-6722-48d0-9147-c4edbdbd5f8e&formtype=item&id=1e379b47-57d2-40d1-9d4d-9ef61198f09e&key=business-deals',
+    'pc-accessories-deals': 'https://cmxtools.dell.com/content?collectionid=af168bc2-6722-48d0-9147-c4edbdbd5f8e&formtype=item&id=9fd47b63-e23d-4b88-a2f4-eeb8bce5ad3f&key=pc-accessories-deals',
+    'computer-monitor-deals': 'https://cmxtools.dell.com/content?collectionid=af168bc2-6722-48d0-9147-c4edbdbd5f8e&formtype=item&id=33e1851c-56fa-46b2-8489-6cbceefb0053&key=computer-monitor-deals',
+    'gaming-pc-deals': 'https://cmxtools.dell.com/content?collectionid=af168bc2-6722-48d0-9147-c4edbdbd5f8e&formtype=item&id=de22d18b-19f2-4aa2-8b20-c8dacf6bec8d&key=gaming-pc-deals',
+    'desktop-deals': 'https://cmxtools.dell.com/content?collectionid=af168bc2-6722-48d0-9147-c4edbdbd5f8e&formtype=item&id=9b5dd19c-febe-42c9-aa94-761dbb8c5c98&key=desktop-deals',
+    'laptop-deals': 'https://cmxtools.dell.com/content?collectionid=af168bc2-6722-48d0-9147-c4edbdbd5f8e&formtype=item&id=d9abedf0-b37d-4147-9d47-f82c20f546f5&key=laptop-deals',
+    'clearance-deals': 'https://cmxtools.dell.com/content?collectionid=af168bc2-6722-48d0-9147-c4edbdbd5f8e&formtype=item&id=6b1ae5a2-68f7-4900-86bd-fe74bbaf8000&key=clearance-deals',
+    'top-deals': 'https://cmxtools.dell.com/content?collectionid=af168bc2-6722-48d0-9147-c4edbdbd5f8e&formtype=item&id=10739488-a29b-47d0-b10c-b7ca11fbd31d&key=top-deals',
+  }
+};
+
+// FAQ Profiles URLs
+var FAQ_PROFILE_URLS = {
+  'en/us': {
+    'top-deals': 'https://cmxtools.dell.com/content?collectionid=d2b27735-a022-4e49-b493-5e6d89f85be4&formtype=item&id=b3b25381-0c39-4279-bcf7-b13caab98c8b&key=top-deals',
+    'laptop-deals': 'https://cmxtools.dell.com/content?collectionid=d2b27735-a022-4e49-b493-5e6d89f85be4&formtype=item&id=db5446a4-fd85-4ccd-b627-0b907dd536c0&key=laptop-deals',
+    'desktop-deals': 'https://cmxtools.dell.com/content?collectionid=d2b27735-a022-4e49-b493-5e6d89f85be4&formtype=item&id=0d97a241-9a0d-4c41-be6c-5d885b485a46&key=desktop-deals',
+    'computer-monitor-deals': 'http://cmxtools.dell.com/content?collectionid=d2b27735-a022-4e49-b493-5e6d89f85be4&formtype=item&id=77f45ed0-00bc-411f-bb0f-0545ae2906d6&key=computer-monitor-deals',
+    'pc-accessories-deals': 'https://cmxtools.dell.com/content?collectionid=d2b27735-a022-4e49-b493-5e6d89f85be4&formtype=item&id=84e6be28-ec6f-45ad-a98f-7cc443a0bb56&key=pc-accessories-deals',
+    'business-laptop-deals': 'https://cmxtools.dell.com/content?collectionid=d2b27735-a022-4e49-b493-5e6d89f85be4&formtype=item&id=dfd17bfb-7a9d-43a7-8827-27911dd7b281&key=business-laptop-deals',
+    'business-desktop-deals': 'https://cmxtools.dell.com/content?collectionid=d2b27735-a022-4e49-b493-5e6d89f85be4&formtype=item&id=6ae3e28d-1c55-4a92-ac54-189289180c92&key=business-desktop-deals',
+  },
+  'en/ca': {
+    'top-deals': 'https://cmxtools.dell.com/content?collectionid=d2b27735-a022-4e49-b493-5e6d89f85be4&formtype=item&id=04650e5d-c75e-4dc6-8b14-1d80b8773277&key=top-deals',
+    'clearance-deals': 'https://cmxtools.dell.com/content?collectionid=d2b27735-a022-4e49-b493-5e6d89f85be4&formtype=item&id=1c3b28c2-5e52-4345-b55e-f500b9a953a2&key=clearance-deals',
+    'laptop-deals': 'https://cmxtools.dell.com/content?collectionid=d2b27735-a022-4e49-b493-5e6d89f85be4&formtype=item&id=34f20fbc-f802-49cc-8f80-d30ac0236423&key=laptop-deals',
+    'desktop-deals': 'https://cmxtools.dell.com/content?collectionid=d2b27735-a022-4e49-b493-5e6d89f85be4&formtype=item&id=16def5a2-bb5e-4ea2-8f31-73fa65f126da&key=desktop-deals',
+    'gaming-pc-deals': 'https://cmxtools.dell.com/content?collectionid=d2b27735-a022-4e49-b493-5e6d89f85be4&formtype=item&id=4d5a6601-29e9-4702-a6ae-57dbc5da84db&key=gaming-pc-deals',
+    'computer-monitor-deals': 'https://cmxtools.dell.com/content?collectionid=d2b27735-a022-4e49-b493-5e6d89f85be4&formtype=item&id=338187d5-d86a-4296-8697-c5bf964be723&key=computer-monitor-deals',
+    'pc-accessories-deals': 'https://cmxtools.dell.com/content?collectionid=d2b27735-a022-4e49-b493-5e6d89f85be4&formtype=item&id=b4fe8533-7bfe-425e-b705-a53fe740b704&key=pc-accessories-deals',
+    'business-deals': 'https://cmxtools.dell.com/content?collectionid=d2b27735-a022-4e49-b493-5e6d89f85be4&formtype=item&id=c7d40d65-a1d0-4885-9b7c-16df0df6deec&key=business-deals',
+  },
+  'fr/ca': {
+    'top-deals': 'https://cmxtools.dell.com/content?collectionid=d2b27735-a022-4e49-b493-5e6d89f85be4&formtype=item&id=cc4fe57c-59ee-45a2-b2af-186f54ac3708&key=top-deals',
+    'clearance-deals': 'https://cmxtools.dell.com/content?collectionid=d2b27735-a022-4e49-b493-5e6d89f85be4&formtype=item&id=8b726f52-0782-48c2-9e0d-e01fa1771dea&key=clearance-deals',
+    'laptop-deals': 'https://cmxtools.dell.com/content?collectionid=d2b27735-a022-4e49-b493-5e6d89f85be4&formtype=item&id=e237c93f-da0d-4b83-aa77-b9d02702feac&key=laptop-deals',
+    'desktop-deals': 'https://cmxtools.dell.com/content?collectionid=d2b27735-a022-4e49-b493-5e6d89f85be4&formtype=item&id=112384ab-0b3d-45b4-a277-b1b86de5435b&key=desktop-deals',
+    'gaming-pc-deals': 'https://cmxtools.dell.com/content?collectionid=d2b27735-a022-4e49-b493-5e6d89f85be4&formtype=item&id=3079aca1-5881-4d54-9f38-aac9c28cf1f1&key=gaming-pc-deals',
+    'computer-monitor-deals': 'https://cmxtools.dell.com/content?collectionid=d2b27735-a022-4e49-b493-5e6d89f85be4&formtype=item&id=34d41e00-5fde-47c9-93a5-68fe4315aab1&key=computer-monitor-deals',
+    'pc-accessories-deals': 'https://cmxtools.dell.com/content?collectionid=d2b27735-a022-4e49-b493-5e6d89f85be4&formtype=item&id=72279440-5ca3-42df-842c-72d94f5cd012&key=pc-accessories-deals',
+  },
+  'en/uk': {
+    'top-deals': 'https://cmxtools.dell.com/content?collectionid=d2b27735-a022-4e49-b493-5e6d89f85be4&formtype=item&id=97881b38-ded4-4d2d-9409-268ecbc126f7&key=top-deals',
+    'clearance-deals': 'https://cmxtools.dell.com/content?collectionid=d2b27735-a022-4e49-b493-5e6d89f85be4&formtype=item&id=20d7cc42-f3cc-40b7-859c-ac6ece1d4c68&key=clearance-deals',
+    'laptop-deals': 'https://cmxtools.dell.com/content?collectionid=d2b27735-a022-4e49-b493-5e6d89f85be4&formtype=item&id=07e7f619-bdc0-4e95-b357-9dbf1d10c405&key=laptop-deals',
+    'desktop-deals': 'https://cmxtools.dell.com/content?collectionid=d2b27735-a022-4e49-b493-5e6d89f85be4&formtype=item&id=0c84cca1-7919-4a4f-9eae-bd2a2badad6d&key=desktop-deals',
+    'gaming-pc-deals': 'https://cmxtools.dell.com/content?collectionid=d2b27735-a022-4e49-b493-5e6d89f85be4&formtype=item&id=e1b21999-8e39-494a-b4dd-5c27a60edd61&key=gaming-pc-deals',
+    'computer-monitor-deals': 'https://cmxtools.dell.com/content?collectionid=d2b27735-a022-4e49-b493-5e6d89f85be4&formtype=item&id=acd04844-f641-43c9-967b-59e3498700ec&key=computer-monitor-deals',
+    'pc-accessories-deals': 'https://cmxtools.dell.com/content?collectionid=d2b27735-a022-4e49-b493-5e6d89f85be4&formtype=item&id=358c3973-30b0-4bb9-a998-f876dcb822b6&key=pc-accessories-deals',
+  },
+  'ja/jp': {
+    'top-deals': 'https://cmxtools.dell.com/content?collectionid=d2b27735-a022-4e49-b493-5e6d89f85be4&formtype=item&id=2b3b2804-6457-4230-b81a-afff47f4a8de&key=top-deals',
+    'clearance-deals': 'https://cmxtools.dell.com/content?collectionid=d2b27735-a022-4e49-b493-5e6d89f85be4&formtype=item&id=74024372-8094-48d2-9d0a-86b8924f6313&key=clearance-deals',
+    'laptop-deals': 'https://cmxtools.dell.com/content?collectionid=d2b27735-a022-4e49-b493-5e6d89f85be4&formtype=item&id=fc70d850-05da-4df1-afe7-bd1f9fa13818&key=laptop-deals',
+    'desktop-deals': 'https://cmxtools.dell.com/content?collectionid=d2b27735-a022-4e49-b493-5e6d89f85be4&formtype=item&id=a5e9b630-099e-4bc6-8071-dac78d8c8929&key=desktop-deals',
+    'gaming-pc-deals': 'https://cmxtools.dell.com/content?collectionid=d2b27735-a022-4e49-b493-5e6d89f85be4&formtype=item&id=2e90c7c3-cd77-41a7-910d-17e2dec50db3&key=gaming-pc-deals',
+    'computer-monitor-deals': 'https://cmxtools.dell.com/content?collectionid=d2b27735-a022-4e49-b493-5e6d89f85be4&formtype=item&id=256dbb72-554e-4ae2-bd0f-8d38c9c1aca7&key=computer-monitor-deals',
+    'pc-accessories-deals': 'https://cmxtools.dell.com/content?collectionid=d2b27735-a022-4e49-b493-5e6d89f85be4&formtype=item&id=50b8b9e3-5bd6-4a27-8376-febff91286a3&key=pc-accessories-deals',
+  }
+};
+
 // Profile display order
 var PROFILE_ORDER = [
   'en/us', 'en/ca', 'fr/ca', 'zh/cn', 'en/uk', 'pt/br',
@@ -296,6 +362,28 @@ var profiles = PROFILE_ORDER.map(function (id) {
     hasIMM: NO_IMM.indexOf(id) === -1,
     hasFAQ: HAS_FAQ.indexOf(id) !== -1,
     categories: PROFILE_URLS[id] || {},
+  };
+});
+
+var immProfiles = Object.keys(IMM_PROFILE_URLS).map(function (id) {
+  return {
+    id: id,
+    slug: profileToSlug(id),
+    isAdmin: ADMIN_PROFILES.indexOf(id) !== -1,
+    hasIMM: true,
+    hasFAQ: HAS_FAQ.indexOf(id) !== -1,
+    categories: IMM_PROFILE_URLS[id] || {},
+  };
+});
+
+var faqProfiles = Object.keys(FAQ_PROFILE_URLS).map(function (id) {
+  return {
+    id: id,
+    slug: profileToSlug(id),
+    isAdmin: ADMIN_PROFILES.indexOf(id) !== -1,
+    hasIMM: NO_IMM.indexOf(id) === -1,
+    hasFAQ: true,
+    categories: FAQ_PROFILE_URLS[id] || {},
   };
 });
 

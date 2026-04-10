@@ -4,11 +4,17 @@
   'use strict';
 
   // ===== DOM REFERENCES =====
-  var tabDashboard = document.getElementById('tab-dashboard');
-  var tabCompare = document.getElementById('tab-compare');
+  var mainTabs = document.querySelectorAll('.nav-tab[data-main-tab]');
+  var subTabs = document.querySelectorAll('.subnav-tab[data-sub-tab]');
   var pageDashboard = document.getElementById('page-dashboard');
   var pageCompare = document.getElementById('page-compare');
   var navLogo = document.getElementById('nav-logo');
+  var compareEmptyState = document.getElementById('compare-empty-state');
+  var compareContent = document.getElementById('compare-content');
+
+  // State state
+  var currentMainTab = 'category'; // category | imm | faq
+  var currentSubTab = 'dashboard'; // dashboard | compare
 
   // Dashboard elements
   var filterCategory = document.getElementById('filter-category');
@@ -41,23 +47,63 @@
   var warningsContainer = document.getElementById('warnings-container');
   var btnCopyScripts = document.getElementById('btn-copy-scripts');
   var copyBtnText = document.getElementById('copy-btn-text');
+  var canonicalSection = document.querySelector('.canonical-section');
 
   // ===== NAVIGATION =====
-  function switchPage(pageName) {
-    // Update tabs
-    tabDashboard.classList.toggle('active', pageName === 'dashboard');
-    tabCompare.classList.toggle('active', pageName === 'compare');
-
-    // Update pages
-    pageDashboard.classList.toggle('active', pageName === 'dashboard');
-    pageCompare.classList.toggle('active', pageName === 'compare');
+  function switchMainTab(tabId) {
+    currentMainTab = tabId;
+    mainTabs.forEach(function(tab) {
+      tab.classList.toggle('active', tab.getAttribute('data-main-tab') === tabId);
+    });
+    
+    // Update dashboard content
+    renderDashboard();
+    
+    // Update comparison tool visibility
+    if (tabId === 'category') {
+      compareContent.classList.remove('hidden');
+      compareEmptyState.classList.add('hidden');
+      if (canonicalSection) canonicalSection.classList.remove('hidden');
+      csTextarea.placeholder = "Paste Content-Studio data here...\n\nTab Name\nSummer Sale Deals\nHero Subtitle\nSave big on tech\n...";
+      cmxTextarea.placeholder = "Paste CMX data here (leave empty to generate all scripts)...\n\nDisplay Name\nSummer Sale Deals\nShort Title\nSave big on tech\n...";
+    } else if (tabId === 'faq') {
+      compareContent.classList.remove('hidden');
+      compareEmptyState.classList.add('hidden');
+      if (canonicalSection) canonicalSection.classList.add('hidden');
+      csTextarea.placeholder = "Paste Content-Studio FAQ data here...\n\nTitle\nLearn More About Top Deals\nDescription\n...";
+      cmxTextarea.placeholder = "Paste CMX FAQ data here (leave empty to generate all scripts)...\n\nTitle\nLearn More About Top Deals\nHeader\n...";
+    } else {
+      compareContent.classList.add('hidden');
+      compareEmptyState.classList.remove('hidden');
+    }
   }
 
-  tabDashboard.addEventListener('click', function () { switchPage('dashboard'); });
-  tabCompare.addEventListener('click', function () { switchPage('compare'); });
+  function switchSubTab(subTabId) {
+    currentSubTab = subTabId;
+    subTabs.forEach(function(tab) {
+      tab.classList.toggle('active', tab.getAttribute('data-sub-tab') === subTabId);
+    });
+
+    pageDashboard.classList.toggle('active', subTabId === 'dashboard');
+    pageCompare.classList.toggle('active', subTabId === 'compare');
+  }
+
+  mainTabs.forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      switchMainTab(this.getAttribute('data-main-tab'));
+    });
+  });
+
+  subTabs.forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      switchSubTab(this.getAttribute('data-sub-tab'));
+    });
+  });
+
   navLogo.addEventListener('click', function (e) {
     e.preventDefault();
-    switchPage('dashboard');
+    switchMainTab('category');
+    switchSubTab('dashboard');
   });
 
   // ===== DASHBOARD: POPULATE FILTERS =====
@@ -151,7 +197,14 @@
     var catFilter = filterCategory.value;
     var profFilter = filterProfile.value;
 
-    var filtered = profiles.filter(function (p) {
+    var currentProfiles = profiles;
+    if (currentMainTab === 'imm') {
+      currentProfiles = immProfiles;
+    } else if (currentMainTab === 'faq') {
+      currentProfiles = faqProfiles;
+    }
+
+    var filtered = currentProfiles.filter(function (p) {
       if (profFilter && p.id !== profFilter) return false;
       if (catFilter && !p.categories[catFilter]) return false;
 
@@ -179,7 +232,7 @@
     }
 
     // Update count
-    filterCountEl.textContent = 'Showing ' + filtered.length + ' of ' + profiles.length + ' profiles';
+    filterCountEl.textContent = 'Showing ' + filtered.length + ' of ' + currentProfiles.length + ' profiles';
 
     // Toggle clear button
     if (catFilter || profFilter || filterAdmin.checked || filterNotAdmin.checked || filterImm.checked || filterFaq.checked) {
@@ -226,6 +279,13 @@
   function renderProfileOptions(searchText) {
     profileOptions.innerHTML = '';
 
+    var currentProfiles = profiles;
+    if (currentMainTab === 'imm') {
+      currentProfiles = immProfiles;
+    } else if (currentMainTab === 'faq') {
+      currentProfiles = faqProfiles;
+    }
+
     // "All Profiles" option
     if (!searchText) {
       var allOpt = document.createElement('div');
@@ -237,7 +297,7 @@
       profileOptions.appendChild(allOpt);
     }
 
-    var filtered = profiles.filter(function (p) {
+    var filtered = currentProfiles.filter(function (p) {
       return p.id.toLowerCase().indexOf(searchText.toLowerCase()) !== -1;
     });
 
@@ -298,7 +358,12 @@
   btnCompare.addEventListener('click', function () {
     if (!csTextarea.value.trim()) return;
 
-    var result = compareTexts(csTextarea.value, cmxTextarea.value);
+    var result;
+    if (currentMainTab === 'faq') {
+      result = compareFaqTexts(csTextarea.value, cmxTextarea.value);
+    } else {
+      result = compareTexts(csTextarea.value, cmxTextarea.value);
+    }
 
     // Show results section
     resultsSection.classList.remove('hidden');
@@ -316,7 +381,8 @@
     // Always show differences breakdown
     diffContainer.classList.remove('hidden');
     var fieldsToUpdate = result.differences.filter(function (d) { return d.needsUpdate; }).length;
-    diffCountText.textContent = fieldsToUpdate + ' field' + (fieldsToUpdate !== 1 ? 's' : '') + ' need updating out of 11:';
+    var totalFields = result.differences.length;
+    diffCountText.textContent = fieldsToUpdate + ' field' + (fieldsToUpdate !== 1 ? 's' : '') + ' need updating out of ' + totalFields + ':';
 
     // Build table rows
     diffTableBody.innerHTML = '';
