@@ -38,94 +38,18 @@ function generateJQueryScript(templateType, cmxLabel, origValue, index) {
 }
 
 /**
- * HTML Sanitizer
- */
-function sanitizeNode(node) {
-   var temp = document.createElement('div');
-   temp.appendChild(node.cloneNode(true));
-   var all = temp.querySelectorAll('*');
-   for (var i = 0; i < all.length; i++) {
-       all[i].removeAttribute('class');
-       all[i].removeAttribute('id');
-       all[i].removeAttribute('style');
-       all[i].removeAttribute('data-mce-style');
-       all[i].removeAttribute('dir');
-   }
-   return temp.innerHTML.trim();
-}
-
-/**
- * Robust HTML Block Extractor
- * Converts deeply nested HTML back into linear mapped label/value pairs.
- */
-function extractBlocks(html) {
-  var container = document.createElement('div');
-  container.innerHTML = html;
-  
-  var blocks = [];
-  var currentBlockHtml = [];
-  var currentBlockText = [];
-
-  function flush() {
-    var txt = currentBlockText.join(' ').trim();
-    if (txt) {
-      blocks.push({ text: txt.replace(/\s+/g, ' '), html: currentBlockHtml.join('') });
-    }
-    currentBlockHtml = [];
-    currentBlockText = [];
-  }
-
-  for (var i = 0; i < container.childNodes.length; i++) {
-    var node = container.childNodes[i];
-    
-    if (node.nodeName === 'BR') {
-      flush();
-    } else if (node.nodeType === Node.TEXT_NODE) {
-      var val = node.textContent;
-      if (val.trim()) {
-         currentBlockText.push(val);
-         currentBlockHtml.push(val);
-      }
-    } else if (node.nodeType === Node.ELEMENT_NODE) {
-      var blockTags = ['DIV','P','H1','H2','H3','H4','H5','H6','UL','OL','LI','BLOCKQUOTE','TR','TD'];
-      var isBlock = blockTags.indexOf(node.nodeName) !== -1;
-      
-      if (isBlock) {
-         flush();
-         var txt = node.textContent.trim();
-         if (txt) {
-             var cleanHtml = sanitizeNode(node);
-             blocks.push({ text: txt.replace(/\s+/g, ' '), html: cleanHtml });
-         }
-      } else {
-         var txt = node.textContent.trim();
-         if (txt) {
-            currentBlockText.push(txt);
-            var temp = document.createElement('div');
-            temp.appendChild(node.cloneNode(true));
-            currentBlockHtml.push(sanitizeNode(node));
-         }
-      }
-    }
-  }
-  flush();
-
-  return blocks;
-}
-
-/**
- * Parse HTML input blocks (label in one block, value in the next)
+ * Parse plain text input (label on one line, value on the next)
  * Returns a Map of label → value
  */
-function parseTextToMap(html) {
-  var blocks = extractBlocks(html);
+function parseTextToMap(text) {
+  var lines = text.split('\n').map(function(line) { return line.replace(/\r$/, ''); });
   var map = {};
 
-  for (var i = 0; i < blocks.length; i++) {
-    var label = blocks[i].text;
-    if (label !== '') {
-      var valueHtml = (i + 1 < blocks.length) ? blocks[i + 1].html : '';
-      map[label] = valueHtml;
+  for (var i = 0; i < lines.length; i++) {
+    var trimmed = lines[i].trim();
+    if (trimmed !== '') {
+      var valueLine = (i + 1 < lines.length) ? lines[i + 1].trim() : '';
+      map[trimmed] = valueLine;
     }
   }
 
@@ -133,15 +57,16 @@ function parseTextToMap(html) {
 }
 
 /**
- * Get the HTML value between two labels in the raw HTML blocks
+ * Get the value between two labels in the raw text
+ * (for manual-copy fields like Hero Description)
  */
-function getValueBetweenLabels(html, startLabel, endLabel) {
-  var blocks = extractBlocks(html);
+function getValueBetweenLabels(text, startLabel, endLabel) {
+  var lines = text.split('\n').map(function(line) { return line.replace(/\r$/, ''); });
   var startIndex = -1;
-  var endIndex = blocks.length;
+  var endIndex = lines.length;
 
-  for (var i = 0; i < blocks.length; i++) {
-    var trimmed = blocks[i].text;
+  for (var i = 0; i < lines.length; i++) {
+    var trimmed = lines[i].trim();
     if (trimmed === startLabel) {
       startIndex = i;
     }
@@ -153,12 +78,15 @@ function getValueBetweenLabels(html, startLabel, endLabel) {
 
   if (startIndex === -1) return null;
 
-  var valueHtmls = [];
+  var valueLines = [];
   for (var j = startIndex + 1; j < endIndex; j++) {
-     valueHtmls.push(blocks[j].html);
+    var t = lines[j].trim();
+    if (t !== '') {
+      valueLines.push(t);
+    }
   }
 
-  return valueHtmls.length > 0 ? valueHtmls.join('<br>') : null;
+  return valueLines.length > 0 ? valueLines.join('\n') : null;
 }
 
 /**
@@ -257,39 +185,40 @@ function compareTexts(csText, cmxText) {
 }
 
 /**
- * Parse Content Studio FAQ HTML into head and items array
+ * Parse Content Studio FAQ plain text into head and items array
  */
-function parseCsFaq(html) {
-  var blocks = extractBlocks(html);
+function parseCsFaq(text) {
+  var lines = text.split('\n').map(function(line) { return line.replace(/\r$/, ''); });
   var head = { title: '', description: '', header: '' };
   var items = [];
   var state = 'search_head';
   
-  for (var i = 0; i < blocks.length; i++) {
-    var label = blocks[i].text;
+  for (var i = 0; i < lines.length; i++) {
+    var line = lines[i].trim();
+    if (!line) continue;
     
     if (state === 'search_head') {
-      if (label === 'Title') {
-        head.title = blocks[++i] ? blocks[i].html : '';
-      } else if (label === 'Description') {
-        head.description = blocks[++i] ? blocks[i].html : '';
-      } else if (label === 'Header') {
-        head.header = blocks[++i] ? blocks[i].html : '';
+      if (line === 'Title') {
+        head.title = lines[++i] ? lines[i].trim() : '';
+      } else if (line === 'Description') {
+        head.description = lines[++i] ? lines[i].trim() : '';
+      } else if (line === 'Header') {
+        head.header = lines[++i] ? lines[i].trim() : '';
         state = 'search_items';
       }
     } else if (state === 'search_items' || state === 'read_items') {
-      if (label === 'FAQ Question') {
-        var q = blocks[++i] ? blocks[i].html : '';
+      if (line === 'FAQ Question') {
+        var q = lines[++i] ? lines[i].trim() : '';
         items.push({ question: q, description: '' });
         state = 'read_items';
-      } else if (label === 'Description' && items.length > 0) {
-        var descHtmls = [];
+      } else if (line === 'Description' && items.length > 0) {
+        var descLines = [];
         var j = i + 1;
-        while (j < blocks.length && blocks[j].text !== 'FAQ Question' && !blocks[j].text.startsWith('(SEOFAQItem)') && !blocks[j].text.startsWith('Version')) {
-            descHtmls.push(blocks[j].html);
+        while (j < lines.length && lines[j].trim() !== 'FAQ Question' && !lines[j].trim().startsWith('(SEOFAQItem)') && !lines[j].trim().startsWith('Version')) {
+            if (lines[j].trim()) descLines.push(lines[j].trim());
             j++;
         }
-        items[items.length - 1].description = descHtmls.join('<br>');
+        items[items.length - 1].description = descLines.join('\n');
         i = j - 1;
       }
     }
@@ -298,46 +227,47 @@ function parseCsFaq(html) {
 }
 
 /**
- * Parse CMX FAQ HTML into head and items array
+ * Parse CMX FAQ plain text into head and items array
  */
-function parseCmxFaq(html) {
-  var blocks = extractBlocks(html);
+function parseCmxFaq(text) {
+  var lines = text.split('\n').map(function(line) { return line.replace(/\r$/, ''); });
   var head = { title: '', description: '', header: '' };
   var items = [];
   var state = 'search_head';
   
-  for (var i = 0; i < blocks.length; i++) {
-    var label = blocks[i].text;
+  for (var i = 0; i < lines.length; i++) {
+    var line = lines[i].trim();
+    if (!line) continue;
     
     if (state === 'search_head') {
-      if (label === 'Title') {
-        head.title = blocks[++i] ? blocks[i].html : '';
-      } else if (label === 'Header') {
-        head.header = blocks[++i] ? blocks[i].html : '';
-      } else if (label === 'SEO Description') {
-        var descHtmls = [];
+      if (line === 'Title') {
+        head.title = lines[++i] ? lines[i].trim() : '';
+      } else if (line === 'Header') {
+        head.header = lines[++i] ? lines[i].trim() : '';
+      } else if (line === 'SEO Description') {
+        var descLines = [];
         var j = i + 1;
-        while (j < blocks.length && blocks[j].text !== 'SEO FAQ' && blocks[j].text !== 'Question') {
-            descHtmls.push(blocks[j].html);
+        while (j < lines.length && lines[j].trim() !== 'SEO FAQ' && lines[j].trim() !== 'Question') {
+            if (lines[j].trim()) descLines.push(lines[j].trim());
             j++;
         }
-        head.description = descHtmls.join('<br>');
+        head.description = descLines.join('\n');
         i = j - 1;
         state = 'search_items';
       }
     } else if (state === 'search_items' || state === 'read_items') {
-      if (label === 'Question') {
-        var q = blocks[++i] ? blocks[i].html : '';
+      if (line === 'Question') {
+        var q = lines[++i] ? lines[i].trim() : '';
         items.push({ question: q, description: '' });
         state = 'read_items';
-      } else if (label === 'SEO Description' && items.length > 0) {
-        var descHtmls = [];
+      } else if (line === 'SEO Description' && items.length > 0) {
+        var descLines = [];
         var j = i + 1;
-        while (j < blocks.length && blocks[j].text !== 'Question' && !blocks[j].text.startsWith('Version') && !blocks[j].text.startsWith('© ')) {
-            descHtmls.push(blocks[j].html);
+        while (j < lines.length && lines[j].trim() !== 'Question' && !lines[j].trim().startsWith('Version') && !lines[j].trim().startsWith('© ')) {
+            if (lines[j].trim()) descLines.push(lines[j].trim());
             j++;
         }
-        items[items.length - 1].description = descHtmls.join('<br>');
+        items[items.length - 1].description = descLines.join('\n');
         i = j - 1;
       }
     }

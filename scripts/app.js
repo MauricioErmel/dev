@@ -64,14 +64,14 @@
       compareContent.classList.remove('hidden');
       compareEmptyState.classList.add('hidden');
       if (canonicalSection) canonicalSection.classList.remove('hidden');
-      csTextarea.setAttribute('data-placeholder', "Paste Content-Studio data here...\n\nTab Name\nSummer Sale Deals\nHero Subtitle\nSave big on tech\n...");
-      cmxTextarea.setAttribute('data-placeholder', "Paste CMX data here (leave empty to generate all scripts)...\n\nDisplay Name\nSummer Sale Deals\nShort Title\nSave big on tech\n...");
+      csTextarea.placeholder = "Paste Content-Studio data here...\n\nTab Name\nSummer Sale Deals\nHero Subtitle\nSave big on tech\n...";
+      cmxTextarea.placeholder = "Paste CMX data here (leave empty to generate all scripts)...\n\nDisplay Name\nSummer Sale Deals\nShort Title\nSave big on tech\n...";
     } else if (tabId === 'faq') {
       compareContent.classList.remove('hidden');
       compareEmptyState.classList.add('hidden');
       if (canonicalSection) canonicalSection.classList.add('hidden');
-      csTextarea.setAttribute('data-placeholder', "Paste Content-Studio FAQ data here...\n\nTitle\nLearn More About Top Deals\nDescription\n...");
-      cmxTextarea.setAttribute('data-placeholder', "Paste CMX FAQ data here (leave empty to generate all scripts)...\n\nTitle\nLearn More About Top Deals\nHeader\n...");
+      csTextarea.placeholder = "Paste Content-Studio FAQ data here...\n\nTitle\nLearn More About Top Deals\nDescription\n...";
+      cmxTextarea.placeholder = "Paste CMX FAQ data here (leave empty to generate all scripts)...\n\nTitle\nLearn More About Top Deals\nHeader\n...";
     } else {
       compareContent.classList.add('hidden');
       compareEmptyState.classList.remove('hidden');
@@ -349,20 +349,20 @@
   // ===== COMPARISON TOOL =====
   // Enable/disable compare button based on textarea content
   function updateCompareButton() {
-    btnCompare.disabled = !csTextarea.textContent.trim();
+    btnCompare.disabled = !csTextarea.value.trim();
   }
 
   csTextarea.addEventListener('input', updateCompareButton);
 
   // Compare
   btnCompare.addEventListener('click', function () {
-    if (!csTextarea.textContent.trim()) return;
+    if (!csTextarea.value.trim()) return;
 
     var result;
     if (currentMainTab === 'faq') {
-      result = compareFaqTexts(csTextarea.innerHTML, cmxTextarea.innerHTML);
+      result = compareFaqTexts(csTextarea.value, cmxTextarea.value);
     } else {
-      result = compareTexts(csTextarea.innerHTML, cmxTextarea.innerHTML);
+      result = compareTexts(csTextarea.value, cmxTextarea.value);
     }
 
     // Show results section
@@ -453,8 +453,8 @@
 
   // Clear
   btnClear.addEventListener('click', function () {
-    csTextarea.innerHTML = '';
-    cmxTextarea.innerHTML = '';
+    csTextarea.value = '';
+    cmxTextarea.value = '';
     resultsSection.classList.add('hidden');
     updateCompareButton();
   });
