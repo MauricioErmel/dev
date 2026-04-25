@@ -43,21 +43,37 @@
     var lines = rawText.split(/\r?\n/).map(function (l) { return l.trim(); }).filter(function (l) { return l.length > 0; });
 
     // We need to find the start of the actual data rows.
-    // A valid profile matches the pattern "xx/xx" (2-letter / 2-letter).
-    var profilePattern = /^[a-z]{2}\/[a-z]{2}$/;
+    // A valid profile matches "xx/xx" or comma-separated "xx/xx,xx/xx,xx/xx".
+    var singleProfile = /^[a-z]{2}\/[a-z]{2}$/;
+    var multiProfile = /^[a-z]{2}\/[a-z]{2}(,[a-z]{2}\/[a-z]{2})+$/;
 
     // Build a map: profile → array of segment strings
     var profileSegments = {};
 
+    // Segment lines contain patterns like "xxxx-Xxxxx" (e.g. "cnsr-Consumer", "comm-Commercial")
+    var segmentPattern = /[a-z]{3,4}-[A-Z][a-zA-Z ]+/;
+
     for (var i = 0; i < lines.length; i++) {
-      if (profilePattern.test(lines[i])) {
-        var profile = lines[i];
-        // The segments line is immediately after the profile line
-        var segments = (i + 1 < lines.length) ? lines[i + 1] : '';
-        if (!profileSegments[profile]) {
-          profileSegments[profile] = [];
+      var line = lines[i];
+      if (singleProfile.test(line) || multiProfile.test(line)) {
+        // Split comma-separated profiles into individual entries
+        var profileList = line.split(',');
+        // Search the next few lines for the segments line
+        // (sometimes a translated name appears between the profile and segments)
+        var segments = '';
+        for (var j = 1; j <= 5 && (i + j) < lines.length; j++) {
+          if (segmentPattern.test(lines[i + j])) {
+            segments = lines[i + j];
+            break;
+          }
         }
-        profileSegments[profile].push(segments);
+        profileList.forEach(function (profile) {
+          profile = profile.trim();
+          if (!profileSegments[profile]) {
+            profileSegments[profile] = [];
+          }
+          profileSegments[profile].push(segments);
+        });
         // Skip the segments line
         i++;
       }
