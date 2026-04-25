@@ -789,6 +789,15 @@ body {
   color: #fff;
 }
 
+.btn-green {
+  background: #16a34a;
+  color: #fff;
+}
+
+.btn-green:hover {
+  filter: brightness(1.1);
+}
+
 /* ===== CANONICAL URL SECTION ===== */
 .canonical-section {
   margin-top: 1.5rem;
@@ -1036,6 +1045,122 @@ body {
   display: block;
 }
 
+/* ===== MISSING PROFILES PAGE ===== */
+.mp-layout {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 1.5rem 2rem;
+}
+
+.mp-textarea {
+  height: 22rem;
+}
+
+.mp-results {
+  margin-top: 1.5rem;
+  animation: slideUp 0.35s ease-out;
+}
+
+.mp-result-card {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 1.25rem;
+}
+
+.mp-message {
+  font-size: 0.9rem;
+  font-weight: 500;
+  line-height: 1.6;
+  flex: 1;
+}
+
+.mp-message-success {
+  color: #166534;
+}
+
+.mp-message-warning {
+  color: #92400e;
+}
+
+.mp-detail-header {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 0.75rem;
+}
+
+.mp-detail-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.4rem;
+  height: 1.4rem;
+  padding: 0 0.3rem;
+  border-radius: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #fff;
+  background: var(--error);
+  margin-right: 0.15rem;
+}
+
+.mp-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 0.4rem;
+}
+
+.mp-profile-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: var(--radius);
+  font-size: 0.8rem;
+  font-weight: 500;
+  border: 1px solid var(--border-light);
+  transition: transform 0.15s ease;
+}
+
+.mp-profile-item:hover {
+  transform: scale(1.03);
+}
+
+.mp-profile-ok {
+  background: var(--success-bg);
+  border-color: var(--success-border);
+}
+
+.mp-profile-ok .mp-profile-icon {
+  color: var(--success);
+  font-size: 0.9rem;
+}
+
+.mp-profile-ok .mp-profile-name {
+  color: #166534;
+}
+
+.mp-profile-missing {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.25);
+}
+
+.mp-profile-missing .mp-profile-icon {
+  color: var(--error);
+  font-size: 0.9rem;
+}
+
+.mp-profile-missing .mp-profile-name {
+  color: #991b1b;
+}
+
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
   .navbar {
@@ -1074,6 +1199,14 @@ body {
   .canonical-section {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .mp-layout {
+    padding: 1rem;
+  }
+
+  .mp-detail-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
   }
 }
 

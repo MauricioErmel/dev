@@ -8,12 +8,14 @@
   var subTabs = document.querySelectorAll('.subnav-tab[data-sub-tab]');
   var pageDashboard = document.getElementById('page-dashboard');
   var pageCompare = document.getElementById('page-compare');
+  var pageMissingProfiles = document.getElementById('page-missing-profiles');
   var navLogo = document.getElementById('nav-logo');
   var compareEmptyState = document.getElementById('compare-empty-state');
   var compareContent = document.getElementById('compare-content');
+  var subnavContainer = document.querySelector('.subnav-container');
 
   // State state
-  var currentMainTab = 'category'; // category | imm | faq
+  var currentMainTab = 'category'; // category | imm | faq | missing-profiles
   var currentSubTab = 'dashboard'; // dashboard | compare
 
   // Dashboard elements
@@ -56,6 +58,19 @@
       tab.classList.toggle('active', tab.getAttribute('data-main-tab') === tabId);
     });
 
+    // Missing Profiles is a standalone page — hide subnav and other pages
+    if (tabId === 'missing-profiles') {
+      subnavContainer.classList.add('hidden');
+      pageDashboard.classList.remove('active');
+      pageCompare.classList.remove('active');
+      pageMissingProfiles.classList.add('active');
+      return;
+    }
+
+    // For all other tabs, show subnav and hide Missing Profiles
+    subnavContainer.classList.remove('hidden');
+    pageMissingProfiles.classList.remove('active');
+
     // Update dashboard content
     renderDashboard();
 
@@ -76,6 +91,9 @@
       compareContent.classList.add('hidden');
       compareEmptyState.classList.remove('hidden');
     }
+
+    // Re-apply current sub tab
+    switchSubTab(currentSubTab);
   }
 
   function switchSubTab(subTabId) {

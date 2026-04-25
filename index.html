@@ -29,6 +29,9 @@
       <button class="nav-tab" data-main-tab="faq">
         <span>FAQ</span>
       </button>
+      <button class="nav-tab" data-main-tab="missing-profiles">
+        <span>Missing Profiles</span>
+      </button>
     </div>
   </nav>
 
@@ -256,9 +259,71 @@
     </div>
   </div>
 
+  <!-- ===== MISSING PROFILES PAGE ===== -->
+  <div class="page" id="page-missing-profiles">
+    <!-- Page header -->
+    <div class="page-header">
+      <div class="page-header-inner">
+        <h1>Missing Profiles</h1>
+        <p>Paste CMX query results to find profiles missing the Consumer segment</p>
+      </div>
+    </div>
+
+    <div class="mp-layout">
+      <!-- Input section -->
+      <div class="mp-input-section">
+        <div class="field-group">
+          <div class="field-legend">
+            <span class="legend-dot cmx"></span>
+            CMX Query Results
+          </div>
+          <textarea id="mp-textarea" class="field-textarea mp-textarea"
+            placeholder="Paste the CMX query results here...&#10;&#10;The text should contain repeating blocks of:&#10;  file-id&#10;  File Name&#10;  profile (e.g. it/it)&#10;  segments (e.g. comm-Commercial, cnsr-Consumer, ...)"></textarea>
+        </div>
+      </div>
+
+      <!-- Action buttons -->
+      <div class="action-row">
+        <button class="btn btn-primary" id="mp-btn-analyze" disabled>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          Analyze
+        </button>
+        <button class="btn btn-ghost" id="mp-btn-clear">Clear</button>
+        <button class="btn btn-green" id="mp-btn-copy-en-all">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+          </svg>
+          <span>Copy EN/ALL Script</span>
+        </button>
+      </div>
+
+      <!-- Results section (hidden by default) -->
+      <div class="mp-results hidden" id="mp-result-section">
+        <div class="results-divider">Analysis Results</div>
+
+        <div class="mp-result-card">
+          <p class="mp-message" id="mp-result-message"></p>
+          <button class="btn btn-sm btn-primary" id="mp-btn-copy-result">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+            <span>Copy Result</span>
+          </button>
+        </div>
+
+        <div id="mp-result-details"></div>
+      </div>
+    </div>
+  </div>
+
   <script src="scripts/data.js"></script>
   <script src="scripts/compare.js"></script>
   <script src="scripts/app.js"></script>
+  <script src="scripts/profiles.js"></script>
 </body>
 
 </html>
