@@ -49,6 +49,7 @@
 
     // Build a map: profile → array of segment strings
     var profileSegments = {};
+    var blocks = [];
 
     // Segment lines contain patterns like "xxxx-Xxxxx" (e.g. "cnsr-Consumer", "comm-Commercial")
     var segmentPattern = /[a-z]{3,4}-[A-Z][a-zA-Z ]+/;
@@ -57,7 +58,7 @@
       var line = lines[i];
       if (singleProfile.test(line) || multiProfile.test(line)) {
         // Split comma-separated profiles into individual entries
-        var profileList = line.split(',');
+        var profileList = line.split(',').map(function (p) { return p.trim(); });
         // Search the next few lines for the segments line
         // (sometimes a translated name appears between the profile and segments)
         var segments = '';
@@ -67,8 +68,13 @@
             break;
           }
         }
+        
+        blocks.push({
+          profiles: profileList,
+          segments: segments
+        });
+
         profileList.forEach(function (profile) {
-          profile = profile.trim();
           if (!profileSegments[profile]) {
             profileSegments[profile] = [];
           }
@@ -79,7 +85,7 @@
       }
     }
 
-    return profileSegments;
+    return { profileSegments: profileSegments, blocks: blocks };
   }
 
   /**
@@ -134,13 +140,73 @@
     return 'Missing ' + formatted;
   }
 
+  var currentEnAllScriptContent = '';
+  var DEFAULT_EN_PROFILES = [
+    'en/ae', 'en/af', 'en/ag', 'en/ai', 'en/al', 'en/ao', 'en/ar', 'en/at', 'en/aw', 'en/ba', 'en/bb', 'en/bd', 'en/be', 'en/bg', 'en/bh', 'en/bm', 'en/bn', 'en/bo', 'en/br', 'en/bs', 'en/bt', 'en/bw', 'en/bz', 'en/ca', 'en/cf', 'en/ch', 'en/ck', 'en/cl', 'en/cn', 'en/co', 'en/cr', 'en/cv', 'en/cy', 'en/cz', 'en/de', 'en/dk', 'en/dm', 'en/do', 'en/dz', 'en/ec', 'en/ee', 'en/eg', 'en/es', 'en/et', 'en/fi', 'en/fj', 'en/fm', 'en/fo', 'en/fr', 'en/gd', 'en/gh', 'en/gm', 'en/gt', 'en/gu', 'en/gy', 'en/hk', 'en/hn', 'en/hr', 'en/ht', 'en/id', 'en/il', 'en/in', 'en/iq', 'en/is', 'en/it', 'en/jm', 'en/jo', 'en/jp', 'en/ke', 'en/kh', 'en/ki', 'en/kr', 'en/kn', 'en/kw', 'en/ky', 'en/la', 'en/lb', 'en/lc', 'en/lk', 'en/lr', 'en/ls', 'en/lt', 'en/lv', 'en/ly', 'en/me', 'en/mk', 'en/mm', 'en/mn', 'en/mp', 'en/ms', 'en/mt', 'en/mu', 'en/mv', 'en/mw', 'en/my', 'en/mx', 'en/mz', 'en/na', 'en/ng', 'en/ni', 'en/nl', 'en/no', 'en/np', 'en/nr', 'en/om', 'en/pa', 'en/pe', 'en/pg', 'en/pl', 'en/ph', 'en/pk', 'en/pr', 'en/pt', 'en/pw', 'en/py', 'en/qa', 'en/rs', 'en/rw', 'en/sa', 'en/sb', 'en/se', 'en/sg', 'en/si', 'en/sk', 'en/sl', 'en/so', 'en/sr', 'en/sv', 'en/sz', 'en/tc', 'en/th', 'en/tl', 'en/to', 'en/tt', 'en/tv', 'en/tw', 'en/tz', 'en/ua', 'en/ug', 'en/uy', 'en/ve', 'en/vc', 'en/vg', 'en/vi', 'en/vn', 'en/vu', 'en/ws', 'en/ye', 'en/za', 'en/zm', 'en/zw'
+  ];
+
+  function generateAndDisplayEnAllScript(blocks) {
+    var finalEnProfiles = DEFAULT_EN_PROFILES.slice();
+    var removedProfiles = [];
+
+    blocks.forEach(function(block) {
+      if (block.segments.indexOf('cnsr-Consumer') !== -1) {
+        var hasEnUs = block.profiles.indexOf('en/us') !== -1;
+        var enProfilesInBlock = block.profiles.filter(function(p) { return p.indexOf('en/') === 0; });
+
+        if (enProfilesInBlock.length > 0 && !hasEnUs) {
+          enProfilesInBlock.forEach(function(p) {
+            var idx = finalEnProfiles.indexOf(p);
+            if (idx !== -1) {
+              finalEnProfiles.splice(idx, 1);
+              if (removedProfiles.indexOf(p) === -1) {
+                removedProfiles.push(p);
+              }
+            }
+          });
+        }
+      }
+    });
+
+    var enAllDetails = document.getElementById('mp-enall-details');
+    var enAllHtml = '<div class="mp-detail-header">' +
+      '<span class="mp-detail-count">' + removedProfiles.length + '</span> of ' + DEFAULT_EN_PROFILES.length + ' profiles removed from EN/ALL script' +
+      '</div>';
+      
+    enAllHtml += '<div class="mp-detail-grid">';
+    DEFAULT_EN_PROFILES.forEach(function (profile) {
+      var isRemoved = removedProfiles.indexOf(profile) !== -1;
+      // Inverting visual state as requested:
+      // Profiles removed from script (already in files) -> 'Included in script' (OK)
+      // Profiles kept in script (missing from files) -> 'Removed from script' (Missing)
+      var statusClass = isRemoved ? 'mp-profile-ok' : 'mp-profile-missing';
+      var icon = isRemoved ? '✓' : '✗';
+      var tooltip = isRemoved ? 'Included in script' : 'Removed from script';
+
+      enAllHtml += '<div class="mp-profile-item ' + statusClass + '" title="' + tooltip + '">' +
+        '<span class="mp-profile-icon">' + icon + '</span>' +
+        '<span class="mp-profile-name">' + profile + '</span>' +
+        '</div>';
+    });
+    enAllHtml += '</div>';
+
+    enAllDetails.innerHTML = enAllHtml;
+
+    var profileString = finalEnProfiles.map(function(p) { return "'" + p + "'"; }).join(', ');
+    currentEnAllScriptContent = "$('dds-label').filter(function () {\n" +
+      "    return [" + profileString + "].includes($(this).attr('title'));\n" +
+      "}).each(function () {\n" +
+      "    $(this).closest('div').find('input[type=checkbox]:not(:checked)').trigger(\"click\");\n" +
+      "});";
+  }
+
   // Analyze button handler
   btnAnalyze.addEventListener('click', function () {
     var rawText = textarea.value.trim();
     if (!rawText) return;
 
-    var profileSegments = parseResults(rawText);
-    var missingList = findMissingConsumer(profileSegments);
+    var parsed = parseResults(rawText);
+    var missingList = findMissingConsumer(parsed.profileSegments);
     var message = formatMessage(missingList);
 
     // Show results
@@ -184,6 +250,8 @@
       resultDetails.innerHTML = detailHtml;
     }
 
+    generateAndDisplayEnAllScript(parsed.blocks);
+
     // Scroll to results
     setTimeout(function () {
       resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -196,6 +264,9 @@
     resultSection.classList.add('hidden');
     resultMessage.textContent = '';
     resultDetails.innerHTML = '';
+    var enAllDetails = document.getElementById('mp-enall-details');
+    if(enAllDetails) enAllDetails.innerHTML = '';
+    currentEnAllScriptContent = '';
     updateAnalyzeButton();
   });
 
@@ -246,13 +317,8 @@
   // Copy EN/ALL Script button handler
   var btnCopyEnAll = document.getElementById('mp-btn-copy-en-all');
   if (btnCopyEnAll) {
-    var enAllScriptContent = "$('dds-label').filter(function () {\n" +
-      "    return ['en/ae', 'en/af', 'en/ag', 'en/ai', 'en/al', 'en/ao', 'en/ar', 'en/at', 'en/au', 'en/aw', 'en/ba', 'en/bb', 'en/bd', 'en/be', 'en/bg', 'en/bh', 'en/bm', 'en/bn', 'en/bo', 'en/br', 'en/bs', 'en/bt', 'en/bw', 'en/bz', 'en/ca', 'en/cf', 'en/ch', 'en/ck', 'en/cl', 'en/cn', 'en/co', 'en/cr', 'en/cv', 'en/cy', 'en/cz', 'en/de', 'en/dk', 'en/dm', 'en/do', 'en/dz', 'en/ec', 'en/ee', 'en/eg', 'en/es', 'en/et', 'en/fi', 'en/fj', 'en/fm', 'en/fo', 'en/fr', 'en/gb', 'en/gd', 'en/gh', 'en/gm', 'en/gt', 'en/gu', 'en/gy', 'en/hk', 'en/hn', 'en/hr', 'en/ht', 'en/id', 'en/ie', 'en/il', 'en/in', 'en/iq', 'en/is', 'en/it', 'en/jm', 'en/jo', 'en/jp', 'en/ke', 'en/kh', 'en/ki', 'en/kr', 'en/kn', 'en/kw', 'en/ky', 'en/la', 'en/lb', 'en/lc', 'en/lk', 'en/lr', 'en/ls', 'en/lt', 'en/lv', 'en/ly', 'en/me', 'en/mk', 'en/mm', 'en/mn', 'en/mp', 'en/ms', 'en/mt', 'en/mu', 'en/mv', 'en/mw', 'en/my', 'en/mx', 'en/mz', 'en/na', 'en/ng', 'en/ni', 'en/nl', 'en/no', 'en/np', 'en/nr', 'en/nz', 'en/om', 'en/pa', 'en/pe', 'en/pg', 'en/pl', 'en/ph', 'en/pk', 'en/pr', 'en/pt', 'en/pw', 'en/py', 'en/qa', 'en/rs', 'en/rw', 'en/sa', 'en/sb', 'en/se', 'en/sg', 'en/si', 'en/sk', 'en/sl', 'en/so', 'en/sr', 'en/sv', 'en/sz', 'en/tc', 'en/th', 'en/tl', 'en/to', 'en/tt', 'en/tv', 'en/tw', 'en/tz', 'en/ua', 'en/ug', 'en/uk', 'en/uy', 'en/ve', 'en/vc', 'en/vg', 'en/vi', 'en/vn', 'en/vu', 'en/ws', 'en/ye', 'en/za', 'en/zm', 'en/zw'].includes($(this).attr('title'));\n" +
-      "}).each(function () {\n" +
-      "    $(this).closest('div').find('input[type=checkbox]:not(:checked)').trigger(\"click\");\n" +
-      "});";
-
     btnCopyEnAll.addEventListener('click', function () {
+      if (!currentEnAllScriptContent) return;
 
       function showFeedback() {
         btnCopyEnAll.classList.add('btn-success-state');
@@ -266,9 +332,9 @@
       }
 
       if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(enAllScriptContent).then(showFeedback).catch(function () {
+        navigator.clipboard.writeText(currentEnAllScriptContent).then(showFeedback).catch(function () {
           var ta = document.createElement('textarea');
-          ta.value = enAllScriptContent;
+          ta.value = currentEnAllScriptContent;
           ta.style.position = 'fixed';
           ta.style.opacity = '0';
           document.body.appendChild(ta);
@@ -279,7 +345,7 @@
         });
       } else {
         var ta = document.createElement('textarea');
-        ta.value = enAllScriptContent;
+        ta.value = currentEnAllScriptContent;
         ta.style.position = 'fixed';
         ta.style.opacity = '0';
         document.body.appendChild(ta);
