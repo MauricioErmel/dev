@@ -117,12 +117,35 @@
     return missing;
   }
 
+  function findMissingCommercial(profileSegments) {
+    var missing = [];
+
+    EXPECTED_PROFILES.forEach(function (profile) {
+      var segmentEntries = profileSegments[profile];
+
+      if (!segmentEntries) {
+        missing.push({ profile: profile, reason: 'not found' });
+      } else {
+        var hasCommercial = segmentEntries.some(function (seg) {
+          return seg.indexOf('comm-Commercial') !== -1 && 
+                 seg.indexOf('ngov-National Government') !== -1 && 
+                 seg.indexOf('lpub-Local Public') !== -1;
+        });
+        if (!hasCommercial) {
+          missing.push({ profile: profile, reason: 'missing commercial segments' });
+        }
+      }
+    });
+
+    return missing;
+  }
+
   /**
    * Format the list of missing profiles into a human-readable message.
    */
-  function formatMessage(missingList) {
+  function formatMessage(missingList, segmentName) {
     if (missingList.length === 0) {
-      return 'All profiles have a file assigned to the Consumer segment.';
+      return 'All profiles have a file assigned to the ' + segmentName + ' segment.';
     }
 
     var profileNames = missingList.map(function (item) { return item.profile; });
@@ -200,6 +223,62 @@
       "});";
   }
 
+  var currentCommEnAllScriptContent = '';
+
+  function generateAndDisplayCommEnAllScript(blocks) {
+    var finalEnProfiles = DEFAULT_EN_PROFILES.slice();
+    var removedProfiles = [];
+
+    blocks.forEach(function(block) {
+      if (block.segments.indexOf('comm-Commercial') !== -1 &&
+          block.segments.indexOf('ngov-National Government') !== -1 &&
+          block.segments.indexOf('lpub-Local Public') !== -1) {
+        var hasEnUs = block.profiles.indexOf('en/us') !== -1;
+        var enProfilesInBlock = block.profiles.filter(function(p) { return p.indexOf('en/') === 0; });
+
+        if (enProfilesInBlock.length > 0 && !hasEnUs) {
+          enProfilesInBlock.forEach(function(p) {
+            var idx = finalEnProfiles.indexOf(p);
+            if (idx !== -1) {
+              finalEnProfiles.splice(idx, 1);
+              if (removedProfiles.indexOf(p) === -1) {
+                removedProfiles.push(p);
+              }
+            }
+          });
+        }
+      }
+    });
+
+    var enAllDetails = document.getElementById('mp-comm-enall-details');
+    var enAllHtml = '<div class="mp-detail-header">' +
+      '<span class="mp-detail-count">' + removedProfiles.length + '</span> of ' + DEFAULT_EN_PROFILES.length + ' profiles removed from Commercial EN/ALL script' +
+      '</div>';
+      
+    enAllHtml += '<div class="mp-detail-grid">';
+    DEFAULT_EN_PROFILES.forEach(function (profile) {
+      var isRemoved = removedProfiles.indexOf(profile) !== -1;
+      var statusClass = isRemoved ? 'mp-profile-ok' : 'mp-profile-missing';
+      var icon = isRemoved ? '✓' : '✗';
+      var tooltip = isRemoved ? 'Included in script' : 'Removed from script';
+
+      enAllHtml += '<div class="mp-profile-item ' + statusClass + '" title="' + tooltip + '">' +
+        '<span class="mp-profile-icon">' + icon + '</span>' +
+        '<span class="mp-profile-name">' + profile + '</span>' +
+        '</div>';
+    });
+    enAllHtml += '</div>';
+
+    enAllDetails.innerHTML = enAllHtml;
+
+    var profileString = finalEnProfiles.map(function(p) { return "'" + p + "'"; }).join(', ');
+    currentCommEnAllScriptContent = "$('dds-label').filter(function () {\n" +
+      "    return [" + profileString + "].includes($(this).attr('title'));\n" +
+      "}).each(function () {\n" +
+      "    $(this).closest('div').find('input[type=checkbox]:not(:checked)').trigger(\"click\");\n" +
+      "});";
+  }
+
   // Analyze button handler
   btnAnalyze.addEventListener('click', function () {
     var rawText = textarea.value.trim();
@@ -207,7 +286,7 @@
 
     var parsed = parseResults(rawText);
     var missingList = findMissingConsumer(parsed.profileSegments);
-    var message = formatMessage(missingList);
+    var message = formatMessage(missingList, 'Consumer');
 
     // Show results
     resultSection.classList.remove('hidden');
@@ -252,6 +331,46 @@
 
     generateAndDisplayEnAllScript(parsed.blocks);
 
+    var missingCommList = findMissingCommercial(parsed.profileSegments);
+    var commMessage = formatMessage(missingCommList, 'Commercial');
+    
+    var commResultMessage = document.getElementById('mp-comm-result-message');
+    commResultMessage.textContent = commMessage;
+    if (missingCommList.length === 0) {
+      commResultMessage.className = 'mp-message mp-message-success';
+    } else {
+      commResultMessage.className = 'mp-message mp-message-warning';
+    }
+    
+    var commResultDetails = document.getElementById('mp-comm-result-details');
+    commResultDetails.innerHTML = '';
+    if (missingCommList.length > 0) {
+      var commDetailHtml = '<div class="mp-detail-header">' +
+        '<span class="mp-detail-count">' + missingCommList.length + '</span> of ' + EXPECTED_PROFILES.length + ' profiles missing Commercial segments' +
+        '</div>';
+
+      commDetailHtml += '<div class="mp-detail-grid">';
+      EXPECTED_PROFILES.forEach(function (profile) {
+        var isMissing = missingCommList.some(function (m) { return m.profile === profile; });
+        var missingItem = missingCommList.find(function (m) { return m.profile === profile; });
+        var statusClass = isMissing ? 'mp-profile-missing' : 'mp-profile-ok';
+        var icon = isMissing ? '✗' : '✓';
+        var tooltip = isMissing
+          ? (missingItem.reason === 'not found' ? 'Profile not found in results' : 'Present but missing Commercial segments')
+          : 'Has Commercial segments';
+
+        commDetailHtml += '<div class="mp-profile-item ' + statusClass + '" title="' + tooltip + '">' +
+          '<span class="mp-profile-icon">' + icon + '</span>' +
+          '<span class="mp-profile-name">' + profile + '</span>' +
+          '</div>';
+      });
+      commDetailHtml += '</div>';
+
+      commResultDetails.innerHTML = commDetailHtml;
+    }
+
+    generateAndDisplayCommEnAllScript(parsed.blocks);
+
     // Scroll to results
     setTimeout(function () {
       resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -267,6 +386,15 @@
     var enAllDetails = document.getElementById('mp-enall-details');
     if(enAllDetails) enAllDetails.innerHTML = '';
     currentEnAllScriptContent = '';
+
+    var commResultMessage = document.getElementById('mp-comm-result-message');
+    if(commResultMessage) commResultMessage.textContent = '';
+    var commResultDetails = document.getElementById('mp-comm-result-details');
+    if(commResultDetails) commResultDetails.innerHTML = '';
+    var commEnAllDetails = document.getElementById('mp-comm-enall-details');
+    if(commEnAllDetails) commEnAllDetails.innerHTML = '';
+    currentCommEnAllScriptContent = '';
+
     updateAnalyzeButton();
   });
 
@@ -346,6 +474,94 @@
       } else {
         var ta = document.createElement('textarea');
         ta.value = currentEnAllScriptContent;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        showFeedback();
+      }
+    });
+  }
+
+  // Copy Commercial result message
+  var btnCopyCommResult = document.getElementById('mp-btn-copy-comm-result');
+  if (btnCopyCommResult) {
+    btnCopyCommResult.addEventListener('click', function () {
+      var commResultMessage = document.getElementById('mp-comm-result-message');
+      var text = commResultMessage ? commResultMessage.textContent : '';
+      if (!text) return;
+
+      function showFeedback() {
+        btnCopyCommResult.classList.add('btn-success-state');
+        var span = btnCopyCommResult.querySelector('span');
+        var originalText = span ? span.textContent : '';
+        if (span) span.textContent = 'Copied!';
+        setTimeout(function () {
+          btnCopyCommResult.classList.remove('btn-success-state');
+          if (span) span.textContent = originalText;
+        }, 2000);
+      }
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(showFeedback).catch(function () {
+          var ta = document.createElement('textarea');
+          ta.value = text;
+          ta.style.position = 'fixed';
+          ta.style.opacity = '0';
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+          showFeedback();
+        });
+      } else {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        showFeedback();
+      }
+    });
+  }
+
+  // Copy Commercial EN/ALL Script button handler
+  var btnCopyCommEnAll = document.getElementById('mp-btn-copy-comm-en-all');
+  if (btnCopyCommEnAll) {
+    btnCopyCommEnAll.addEventListener('click', function () {
+      if (!currentCommEnAllScriptContent) return;
+
+      function showFeedback() {
+        btnCopyCommEnAll.classList.add('btn-success-state');
+        var span = btnCopyCommEnAll.querySelector('span');
+        var originalText = span ? span.textContent : '';
+        if (span) span.textContent = 'Copied!';
+        setTimeout(function () {
+          btnCopyCommEnAll.classList.remove('btn-success-state');
+          if (span) span.textContent = originalText;
+        }, 2000);
+      }
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(currentCommEnAllScriptContent).then(showFeedback).catch(function () {
+          var ta = document.createElement('textarea');
+          ta.value = currentCommEnAllScriptContent;
+          ta.style.position = 'fixed';
+          ta.style.opacity = '0';
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+          showFeedback();
+        });
+      } else {
+        var ta = document.createElement('textarea');
+        ta.value = currentCommEnAllScriptContent;
         ta.style.position = 'fixed';
         ta.style.opacity = '0';
         document.body.appendChild(ta);
