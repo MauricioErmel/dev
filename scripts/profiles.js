@@ -45,14 +45,15 @@
     // We need to find the start of the actual data rows.
     // A valid profile matches "xx/xx" or comma-separated "xx/xx,xx/xx,xx/xx".
     var singleProfile = /^[a-z]{2}\/[a-z]{2}$/;
-    var multiProfile = /^[a-z]{2}\/[a-z]{2}(,[a-z]{2}\/[a-z]{2})+$/;
+    var multiProfile = /^[a-z]{2}\/[a-z]{2}(\s*,\s*[a-z]{2}\/[a-z]{2})+$/;
 
     // Build a map: profile → array of segment strings
     var profileSegments = {};
     var blocks = [];
 
     // Segment lines contain patterns like "xxxx-Xxxxx" (e.g. "cnsr-Consumer", "comm-Commercial")
-    var segmentPattern = /[a-z]{3,4}-[A-Z][a-zA-Z ]+/;
+    // Use ^ to ensure it matches the beginning of the line and not a substring in translated titles (like "Action-Kameras" matching "tion-Kameras")
+    var segmentPattern = /^[a-z]{3,4}-[A-Z][a-zA-Z ]+/;
 
     for (var i = 0; i < lines.length; i++) {
       var line = lines[i];
