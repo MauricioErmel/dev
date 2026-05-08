@@ -4,61 +4,90 @@
   'use strict';
 
   // Profile code → CMX checkbox label mapping
-  var PROFILE_LABELS = {
-    'cs/cz': 'Czech - Czech Republic (CS-CZ)',
-    'da/dk': 'Danish - Denmark (DA-DK)',
-    'de/at': 'German - Austria (DE-AT)',
-    'de/ch': 'German - Switzerland (DE-CH)',
-    'de/de': 'German - Germany (DE-DE)',
-    'el/gr': 'Greek - Greece (EL-GR)',
-    'es/es': 'Spanish - Spain (ES-ES)',
-    'es/la': 'Spanish - Latin America (Pages & Web Parts) (ES-LA)',
-    'es/mx': 'Spanish - Mexico (ES-MX)',
-    'fi/fi': 'Finnish - Finland (FI-FI)',
-    'fr/be': 'French - Belgium (FR-BE)',
-    'fr/ca': 'French - Canada (FR-CA)',
-    'fr/ch': 'French - Switzerland (FR-CH)',
-    'fr/fr': 'French - France (FR-FR)',
-    'hu/hu': 'Hungarian - Hungary (HU-HU)',
-    'it/it': 'Italian - Italy (IT-IT)',
-    'ja/jp': 'Japanese - Japan (JA-JP)',
-    'ko/kr': 'Korean - Korea (KO-KR)',
-    'nl/be': 'Dutch - Belgium (NL-BE)',
-    'nl/nl': 'Dutch - Netherlands (NL-NL)',
-    'no/no': 'Norwegian - Norway (NO-NO)',
-    'pl/pl': 'Polish - Poland (PL-PL)',
-    'pt/br': 'Portuguese - Brazil (PT-BR)',
-    'pt/pt': 'Portuguese - Portugal (PT-PT)',
-    'ro/ro': 'Romanian - Romania (RO-RO)',
-    'ru/ru': 'Russian - Russia (RU-RU)',
-    'ru/ua': 'Russian - Ukraine (RU-UA)',
-    'sk/sk': 'Slovak - Slovakia (SK-SK)',
-    'sv/se': 'Swedish - Sweden (SV-SE)',
-    'tr/tr': 'Turkish - Turkey (TR-TR)',
-    'zh/cn': 'Chinese - China (ZH-CN)',
-    'zh/hk': 'Chinese - Hong Kong (ZH-HK)',
-    'zh/tw': 'Chinese - Taiwan (ZH-TW)'
-  };
+  var FULL_TARGETS = [
+    "Romanian - Romania (RO-RO)", "French - Canada (FR-CA)", "Hungarian - Hungary (HU-HU)",
+    "Slovak - Slovakia (SK-SK)", "Portuguese - Portugal (PT-PT)", "Greek - Greece (EL-GR)",
+    "Turkish - Turkey (TR-TR)", "Norwegian - Norway (NO-NO)", "Danish - Denmark (DA-DK)",
+    "Swedish - Sweden (SV-SE)", "Finnish - Finland (FI-FI)", "Italian - Italy (IT-IT)",
+    "Japanese - Japan (JA-JP)", "Portuguese - Brazil (PT-BR)", "Polish - Poland (PL-PL)",
+    "Chinese - China (ZH-CN)", "Korean - Korea (KO-KR)", "Czech - Czech Republic (CS-CZ)",
+    "Chinese - Taiwan (ZH-TW)", "German - Germany (DE-DE)", "Dutch - Netherlands (NL-NL)",
+    "Dutch - Belgium (NL-BE)", "Chinese - Hong Kong (ZH-HK)", "Russian - Russia (RU-RU)",
+    "Spanish - Spain (ES-ES)", "French - France (FR-FR)", "Russian - Ukraine (RU-UA)",
+    "Spanish - Mexico (ES-MX)", "Spanish - Latin America (Pages & Web Parts) (ES-LA)",
+    "German - Austria (DE-AT)", "German - Switzerland (DE-CH)",
+    "French - Belgium (FR-BE)", "French - Switzerland (FR-CH)", "French - Luxembourg (FR-LU)",
+    "Spanish - Argentina (ES-AR)", "Spanish - Chile (ES-CL)",
+    "Spanish - Colombia (ES-CO)", "Spanish - Peru (ES-PE)", "Spanish - Puerto Rico (ES-PR)",
+    "Spanish - United States (ES-US)"
+  ];
+  var PROFILE_LABELS = {};
+  FULL_TARGETS.forEach(function(t) {
+    var match = t.match(/\((.*?)\)/);
+    if (match) {
+      var code = match[1].toLowerCase().replace('-', '/');
+      PROFILE_LABELS[code] = t;
+    }
+  });
 
-  // Only these 3 profiles are checked for "missing"
-  var DSA_MISSING_PROFILES = ['pt/br', 'fr/fr', 'zh/cn'];
+  // Only these profiles are checked for "missing"
+  var DSA_MISSING_PROFILES = [
+    'ro/ro', 'fr/ca', 'hu/hu', 'sk/sk', 'pt/pt', 'el/gr', 'tr/tr', 'no/no', 'da/dk',
+    'sv/se', 'fi/fi', 'it/it', 'ja/jp', 'pt/br', 'pl/pl', 'zh/cn', 'ko/kr', 'cs/cz',
+    'zh/tw', 'de/de', 'nl/nl', 'nl/be', 'zh/hk', 'ru/ru', 'es/es', 'fr/fr', 'ru/ua',
+    'es/mx', 'es/la', 'de/at', 'de/ch', 'fr/be', 'fr/ch', 'fr/lu',
+    'es/ar', 'es/cl', 'es/co', 'es/pe', 'es/pr', 'es/us'
+  ];
 
   // DOM references
   var textarea = document.getElementById('dsa-textarea');
   var btnAnalyze = document.getElementById('dsa-btn-analyze');
   var btnClear = document.getElementById('dsa-btn-clear');
   var resultSection = document.getElementById('dsa-result-section');
-  var emptyMessage = document.getElementById('dsa-empty-message');
-  var emptyDetails = document.getElementById('dsa-empty-details');
-  var missingMessage = document.getElementById('dsa-missing-message');
-  var missingDetails = document.getElementById('dsa-missing-details');
-  var scriptOutput = document.getElementById('dsa-script-output');
-  var summaryText = document.getElementById('dsa-summary-text');
-  var publishMessage = document.getElementById('dsa-publish-message');
-  var publishDetails = document.getElementById('dsa-publish-details');
+  var emptyConsDetails = document.getElementById('dsa-empty-consumer-details');
+  var emptyCommDetails = document.getElementById('dsa-empty-commercial-details');
+  var groupedDisplayNamesDetails = document.getElementById('dsa-grouped-display-names');
 
-  var currentScriptContent = '';
+  var missingConsDetails = document.getElementById('dsa-missing-consumer-details');
+  var missingCommDetails = document.getElementById('dsa-missing-commercial-details');
+  
+  var scriptOutputEmptyCons = document.getElementById('dsa-script-output-empty-cons');
+  var scriptOutputEmptyComm = document.getElementById('dsa-script-output-empty-comm');
+  var scriptOutputMissingCons = document.getElementById('dsa-script-output-missing-cons');
+  var scriptOutputMissingComm = document.getElementById('dsa-script-output-missing-comm');
+
+  var toggleEmptyCons = document.getElementById('dsa-toggle-script-empty-cons');
+  var toggleEmptyComm = document.getElementById('dsa-toggle-script-empty-comm');
+  var toggleMissingCons = document.getElementById('dsa-toggle-script-missing-cons');
+  var toggleMissingComm = document.getElementById('dsa-toggle-script-missing-comm');
+
+  var summaryText = document.getElementById('dsa-summary-text');
+  var publishDetails = document.getElementById('dsa-publish-details');
+  var scriptOutputPublish = document.getElementById('dsa-script-output-publish');
+  var togglePublish = document.getElementById('dsa-toggle-script-publish');
+
+  var currentScriptEmptyCons = '';
+  var currentScriptEmptyComm = '';
+  var currentScriptMissingCons = '';
+  var currentScriptMissingComm = '';
+  var currentScriptPublish = '';
   var currentSummaryContent = '';
+
+  function toggleScript(btn, outputDiv) {
+    if (outputDiv.classList.contains('hidden')) {
+      outputDiv.classList.remove('hidden');
+      btn.textContent = 'Hide Script';
+    } else {
+      outputDiv.classList.add('hidden');
+      btn.textContent = 'Show Script';
+    }
+  }
+
+  if (toggleEmptyCons) toggleEmptyCons.addEventListener('click', function() { toggleScript(toggleEmptyCons, scriptOutputEmptyCons); });
+  if (toggleEmptyComm) toggleEmptyComm.addEventListener('click', function() { toggleScript(toggleEmptyComm, scriptOutputEmptyComm); });
+  if (toggleMissingCons) toggleMissingCons.addEventListener('click', function() { toggleScript(toggleMissingCons, scriptOutputMissingCons); });
+  if (toggleMissingComm) toggleMissingComm.addEventListener('click', function() { toggleScript(toggleMissingComm, scriptOutputMissingComm); });
+  if (togglePublish) togglePublish.addEventListener('click', function() { toggleScript(togglePublish, scriptOutputPublish); });
 
   // Enable/disable analyze button
   function updateAnalyzeButton() {
@@ -109,18 +138,15 @@
             // Line(s) between profile and segment = display name
             displayName = lines[i + 1];
           }
-          // Capture version (next line after segment)
-          if ((i + j + 1) < lines.length && versionPattern.test(lines[i + j + 1])) {
-            version = lines[i + j + 1];
-          }
-          break;
-        }
+      // Capture version (next line after segment)
+      if ((i + j + 1) < lines.length && versionPattern.test(lines[i + j + 1])) {
+        version = lines[i + j + 1];
       }
+      break;
+    }
+  }
 
-      // Skip en/* profiles — they are source language
-      if (profile.indexOf('en/') === 0) continue;
-
-      entries.push({
+  entries.push({
         profile: profile,
         displayName: displayName,
         segments: segments,
@@ -151,6 +177,7 @@
 
     // 1. Empty Display Names — any profile+segment with blank display name
     entries.forEach(function (entry) {
+      if (entry.profile.indexOf('en/') === 0) return; // Skip source language
       if (entry.hasBlankDisplayName) {
         emptyDisplayNames.push({
           profile: entry.profile,
@@ -161,6 +188,7 @@
 
     // 2. Unpublished Profiles — version not ending with '0'
     entries.forEach(function (entry) {
+      if (entry.profile.indexOf('en/') === 0) return; // Skip source language
       if (entry.version && !entry.version.endsWith('0')) {
         unpublishedProfiles.push({
           profile: entry.profile,
@@ -261,22 +289,117 @@
   }
 
   /**
+   * Generate the row-selection script for draft profiles (by profile + version).
+   */
+  function generatePublishScript(unpublishedItems) {
+    if (unpublishedItems.length === 0) return '';
+
+    var profileLines = unpublishedItems.map(function(item) {
+      return '    "' + item.profile + '"';
+    });
+    var versionLines = unpublishedItems.map(function(item) {
+      return '    "' + item.version + '"';
+    });
+
+    var lines = [
+      '(function () {',
+      '  const profiles = [',
+      profileLines.join(',\n'),
+      '  ];',
+      '  const versions = [',
+      versionLines.join(',\n'),
+      '  ];',
+      '',
+      '  const norm = s => (s || \'\').replace(/\\s+/g, \' \').trim().toLowerCase();',
+      '  const profileSet = new Set(profiles.map(norm));',
+      '  const versionSet = new Set(versions.map(norm));',
+      '',
+      '  document.querySelectorAll(\'div[role="row"]\').forEach(row => {',
+      '    const profile = norm(row.querySelector(\'[col-id="container"] .ag-cell-value\')?.textContent);',
+      '    const version = norm(row.querySelector(\'[col-id="version"] .ag-cell-value, [col-id="Version"] .ag-cell-value\')?.textContent);',
+      '',
+      '    if (profileSet.has(profile) && (versionSet.size === 0 || versionSet.has(version))) {',
+      '      const checkbox = row.querySelector(\'[col-id="key"] input.ag-checkbox-input[type="checkbox"]\');',
+      '      if (checkbox && !checkbox.checked) checkbox.click();',
+      '    }',
+      '  });',
+      '})();'
+    ];
+    return lines.join('\n');
+  }
+
+  function getFlagForProfile(profileCode) {
+    var prefix = profileCode.substring(0, 2).toUpperCase();
+    var flags = {
+      'RO': '🇷🇴', 'FR': '🇫🇷', 'HU': '🇭🇺', 'SK': '🇸🇰', 'PT': '🇵🇹',
+      'EL': '🇬🇷', 'TR': '🇹🇷', 'NO': '🇳🇴', 'DA': '🇩🇰', 'SV': '🇸🇪',
+      'FI': '🇫🇮', 'IT': '🇮🇹', 'JA': '🇯🇵', 'PL': '🇵🇱', 'ZH': '🇨🇳',
+      'KO': '🇰🇷', 'CS': '🇨🇿', 'DE': '🇩🇪', 'NL': '🇳🇱', 'RU': '🇷🇺',
+      'ES': '🇪🇸', 'EN': '🇺🇸'
+    };
+    return flags[prefix] || '';
+  }
+
+  function renderGroupedDisplayNames(entries) {
+    var grouped = {};
+    entries.forEach(function(e) {
+      if (e.displayName && e.displayName.trim() !== '') {
+        var dn = e.displayName.trim();
+        if (!grouped[dn]) grouped[dn] = [];
+        if (grouped[dn].indexOf(e.profile) === -1) {
+          grouped[dn].push(e.profile);
+        }
+      }
+    });
+
+    var keys = Object.keys(grouped);
+    if (keys.length === 0) return '<div class="mp-detail-header">No Display Names found.</div>';
+
+    var html = '<div class="diff-table-wrapper" style="margin-top: 1rem;">' +
+               '<table class="diff-table">' +
+               '<thead><tr><th style="width: 30%;">Display Name</th><th>Profiles</th></tr></thead>' +
+               '<tbody>';
+
+    keys.forEach(function(dn) {
+      html += '<tr>' +
+              '<td style="font-weight: 600; color: #0f172a; vertical-align: top;">' + dn + '</td>' +
+              '<td>' +
+              '<div style="display: flex; flex-wrap: wrap; gap: 0.25rem;">';
+      
+      grouped[dn].forEach(function(prof) {
+        var flag = getFlagForProfile(prof);
+        html += '<span style="background: white; border: 1px solid #cbd5e1; padding: 0.1rem 0.3rem; border-radius: 4px; font-size: 0.8rem; color: #475569; display: flex; align-items: center; gap: 0.2rem;">' +
+                '<span>' + flag + '</span>' +
+                '<span>' + prof + '</span>' +
+                '</span>';
+      });
+
+      html += '</div></td></tr>';
+    });
+
+    html += '</tbody></table></div>';
+    return html;
+  }
+
+  /**
    * Render the profile detail grid for empty display names.
    */
-  function renderEmptyGrid(entries, emptyItems) {
-    // Get unique profiles from entries
+  function renderEmptyGrid(entries, emptyItems, segmentType) {
+    var segmentEntries = entries.filter(function(e) { 
+      return getSegmentLabel(e.segments) === segmentType && e.profile.indexOf('en/') !== 0; 
+    });
     var allProfiles = [];
     var seen = {};
-    entries.forEach(function (e) {
-      var key = e.profile + '|' + getSegmentLabel(e.segments);
+    segmentEntries.forEach(function (e) {
+      var key = e.profile;
       if (!seen[key]) {
         seen[key] = true;
-        allProfiles.push({ profile: e.profile, segment: getSegmentLabel(e.segments) });
+        allProfiles.push({ profile: e.profile, segment: segmentType });
       }
     });
 
     var html = '<div class="mp-detail-header">' +
-      '<span class="mp-detail-count">' + emptyItems.length + '</span> profile(s) with blank Display Name' +
+      '<span class="mp-detail-count">' + emptyItems.length + '</span> ' + segmentType + ' profile(s) with blank Display Name' +
       '</div>';
 
     html += '<div class="mp-detail-grid">';
@@ -290,7 +413,7 @@
 
       html += '<div class="mp-profile-item ' + statusClass + '" title="' + tooltip + '">' +
         '<span class="mp-profile-icon">' + icon + '</span>' +
-        '<span class="mp-profile-name">' + item.profile + ' <small style="opacity:.6">(' + (item.segment === 'Consumer' ? 'cnsr' : 'comm') + ')</small></span>' +
+        '<span class="mp-profile-name">' + item.profile + '</span>' +
         '</div>';
     });
     html += '</div>';
@@ -305,10 +428,14 @@
     var allProfiles = [];
     var seen = {};
     entries.forEach(function (e) {
-      var key = e.profile + '|' + getSegmentLabel(e.segments);
+      if (e.profile.indexOf('en/') === 0) return; // Skip source language
+      var seg = getSegmentLabel(e.segments);
+      if (seg !== 'Consumer' && seg !== 'Commercial') return;
+
+      var key = e.profile + '|' + seg;
       if (!seen[key]) {
         seen[key] = true;
-        allProfiles.push({ profile: e.profile, segment: getSegmentLabel(e.segments), version: e.version });
+        allProfiles.push({ profile: e.profile, segment: seg, version: e.version });
       }
     });
 
@@ -324,10 +451,11 @@
       var statusClass = isUnpublished ? 'mp-profile-missing' : 'mp-profile-ok';
       var icon = isUnpublished ? '✗' : '✓';
       var tooltip = isUnpublished ? 'Draft v' + item.version + ' (' + item.segment + ')' : 'Published (' + item.segment + ')';
+      var segTag = item.segment === 'Consumer' ? 'cnsr' : 'comm';
 
       html += '<div class="mp-profile-item ' + statusClass + '" title="' + tooltip + '">' +
         '<span class="mp-profile-icon">' + icon + '</span>' +
-        '<span class="mp-profile-name">' + item.profile + ' <small style="opacity:.6">(' + (item.segment === 'Consumer' ? 'cnsr' : 'comm') + ')</small></span>' +
+        '<span class="mp-profile-name">' + item.profile + ' <small style="opacity:.6">(' + segTag + ')</small></span>' +
         '</div>';
     });
     html += '</div>';
@@ -336,41 +464,29 @@
   }
 
   /**
-   * Render missing profiles grid.
+   * Render missing profiles grid for a specific segment type.
    */
-  function renderMissingGrid(missingItems) {
-    if (missingItems.length === 0) return '';
+  function renderMissingGrid(missingItems, segmentType) {
+    var segmentMissing = missingItems.filter(function(m) {
+      return m.segment === segmentType || m.segment === 'Consumer and Commercial';
+    });
 
     var html = '<div class="mp-detail-header">' +
-      '<span class="mp-detail-count">' + missingItems.length + '</span> missing profile-segment combination(s)' +
+      '<span class="mp-detail-count">' + segmentMissing.length + '</span> missing ' + segmentType + ' profile(s)' +
       '</div>';
 
     html += '<div class="mp-detail-grid">';
     DSA_MISSING_PROFILES.forEach(function (profile) {
-      // Check consumer
-      var missingConsumer = missingItems.some(function (m) {
-        return m.profile === profile && (m.segment === 'Consumer' || m.segment === 'Consumer and Commercial');
-      });
-      var missingCommercial = missingItems.some(function (m) {
-        return m.profile === profile && (m.segment === 'Commercial' || m.segment === 'Consumer and Commercial');
+      var isMissing = segmentMissing.some(function (m) {
+        return m.profile === profile;
       });
 
-      // Consumer entry
-      var cClass = missingConsumer ? 'mp-profile-missing' : 'mp-profile-ok';
-      var cIcon = missingConsumer ? '✗' : '✓';
-      var cTip = missingConsumer ? 'Missing Consumer segment' : 'Has Consumer segment';
-      html += '<div class="mp-profile-item ' + cClass + '" title="' + cTip + '">' +
-        '<span class="mp-profile-icon">' + cIcon + '</span>' +
-        '<span class="mp-profile-name">' + profile + ' <small style="opacity:.6">(cnsr)</small></span>' +
-        '</div>';
-
-      // Commercial entry
-      var xClass = missingCommercial ? 'mp-profile-missing' : 'mp-profile-ok';
-      var xIcon = missingCommercial ? '✗' : '✓';
-      var xTip = missingCommercial ? 'Missing Commercial segment' : 'Has Commercial segment';
-      html += '<div class="mp-profile-item ' + xClass + '" title="' + xTip + '">' +
-        '<span class="mp-profile-icon">' + xIcon + '</span>' +
-        '<span class="mp-profile-name">' + profile + ' <small style="opacity:.6">(comm)</small></span>' +
+      var statusClass = isMissing ? 'mp-profile-missing' : 'mp-profile-ok';
+      var icon = isMissing ? '✗' : '✓';
+      var tooltip = isMissing ? 'Missing ' + segmentType + ' segment' : 'Has ' + segmentType + ' segment';
+      html += '<div class="mp-profile-item ' + statusClass + '" title="' + tooltip + '">' +
+        '<span class="mp-profile-icon">' + icon + '</span>' +
+        '<span class="mp-profile-name">' + profile + '</span>' +
         '</div>';
     });
     html += '</div>';
@@ -428,68 +544,58 @@
     // Show results
     resultSection.classList.remove('hidden');
 
-    // --- Empty Display Names ---
-    if (analysis.emptyDisplayNames.length > 0) {
-      var emptyBold = formatProfileListBold(analysis.emptyDisplayNames);
-      emptyMessage.innerHTML = 'The profile(s) ' + naturalList(emptyBold) +
-        ' have the fields \'Display Name\' empty, they need to be sent for translation!';
-      emptyMessage.className = 'mp-message mp-message-warning';
-    } else {
-      emptyMessage.innerHTML = '✓ All profiles have Display Names filled.';
-      emptyMessage.className = 'mp-message mp-message-success';
-    }
-
-    // --- Unpublished Profiles ---
-    if (analysis.unpublishedProfiles.length > 0) {
-      var publishBold = formatProfileListBold(analysis.unpublishedProfiles);
-      publishMessage.innerHTML = 'The profile(s) ' + naturalList(publishBold) + ' need to be published!';
-      publishMessage.className = 'mp-message mp-message-publish';
-    } else {
-      publishMessage.innerHTML = '';
-    }
-
     // --- Render publish grid ---
-    if (analysis.unpublishedProfiles.length > 0) {
-      publishDetails.innerHTML = renderPublishGrid(entries, analysis.unpublishedProfiles);
-    } else {
-      publishDetails.innerHTML = '';
-    }
+    publishDetails.innerHTML = renderPublishGrid(entries, analysis.unpublishedProfiles);
 
-    emptyDetails.innerHTML = renderEmptyGrid(entries, analysis.emptyDisplayNames);
+    var emptyCons = analysis.emptyDisplayNames.filter(function(i) { return i.segment === 'Consumer'; });
+    var emptyComm = analysis.emptyDisplayNames.filter(function(i) { return i.segment === 'Commercial'; });
 
-    // --- Missing Profiles ---
-    if (analysis.missingProfiles.length > 0) {
-      var missingBold = formatProfileListBold(analysis.missingProfiles);
-      missingMessage.innerHTML = 'Missing ' + naturalList(missingBold);
-      missingMessage.className = 'mp-message mp-message-warning';
-    } else {
-      missingMessage.innerHTML = '✓ All 3 target profiles (pt/br, fr/fr, zh/cn) are present for both segments.';
-      missingMessage.className = 'mp-message mp-message-success';
-    }
-    missingDetails.innerHTML = renderMissingGrid(analysis.missingProfiles);
+    emptyConsDetails.innerHTML = renderEmptyGrid(entries, emptyCons, 'Consumer');
+    emptyCommDetails.innerHTML = renderEmptyGrid(entries, emptyComm, 'Commercial');
 
-    // --- Collect all affected unique profile codes ---
-    var affectedProfiles = {};
-    analysis.emptyDisplayNames.forEach(function (item) {
-      affectedProfiles[item.profile] = true;
-    });
-    analysis.missingProfiles.forEach(function (item) {
-      affectedProfiles[item.profile] = true;
-    });
-    var uniqueCodes = Object.keys(affectedProfiles).sort();
+    // Grouped Display Names
+    groupedDisplayNamesDetails.innerHTML = renderGroupedDisplayNames(entries);
 
-    // --- Generate Script ---
-    if (uniqueCodes.length > 0) {
-      currentScriptContent = generateScript(uniqueCodes);
-      scriptOutput.textContent = currentScriptContent;
-      scriptOutput.classList.remove('hidden');
-      document.getElementById('dsa-script-section').classList.remove('hidden');
-    } else {
-      currentScriptContent = '';
-      scriptOutput.textContent = '';
-      scriptOutput.classList.add('hidden');
-      document.getElementById('dsa-script-section').classList.add('hidden');
-    }
+    // --- Render missing grids ---
+    missingConsDetails.innerHTML = renderMissingGrid(analysis.missingProfiles, 'Consumer');
+    missingCommDetails.innerHTML = renderMissingGrid(analysis.missingProfiles, 'Commercial');
+
+    // --- Generate Scripts ---
+    var emptyConsProfiles = emptyCons.map(function(i) { return i.profile; }).filter(function(v,i,a) { return a.indexOf(v)===i; });
+    var emptyCommProfiles = emptyComm.map(function(i) { return i.profile; }).filter(function(v,i,a) { return a.indexOf(v)===i; });
+
+    var missingConsProfs = analysis.missingProfiles.filter(function(m) { return m.segment === 'Consumer' || m.segment === 'Consumer and Commercial'; }).map(function(i) { return i.profile; }).filter(function(v,i,a) { return a.indexOf(v)===i; });
+    var missingCommProfs = analysis.missingProfiles.filter(function(m) { return m.segment === 'Commercial' || m.segment === 'Consumer and Commercial'; }).map(function(i) { return i.profile; }).filter(function(v,i,a) { return a.indexOf(v)===i; });
+
+    currentScriptEmptyCons = generateScript(emptyConsProfiles);
+    currentScriptEmptyComm = generateScript(emptyCommProfiles);
+    currentScriptMissingCons = generateScript(missingConsProfs);
+    currentScriptMissingComm = generateScript(missingCommProfs);
+
+    scriptOutputEmptyCons.textContent = currentScriptEmptyCons || 'No script needed.';
+    scriptOutputEmptyComm.textContent = currentScriptEmptyComm || 'No script needed.';
+    scriptOutputMissingCons.textContent = currentScriptMissingCons || 'No script needed.';
+    scriptOutputMissingComm.textContent = currentScriptMissingComm || 'No script needed.';
+
+    // --- Generate Publish Script ---
+    currentScriptPublish = generatePublishScript(analysis.unpublishedProfiles);
+    scriptOutputPublish.textContent = currentScriptPublish || 'No script needed.';
+
+    // Hide all scripts by default on new analyze
+    scriptOutputEmptyCons.classList.add('hidden');
+    if(toggleEmptyCons) toggleEmptyCons.textContent = 'Show Script';
+    
+    scriptOutputEmptyComm.classList.add('hidden');
+    if(toggleEmptyComm) toggleEmptyComm.textContent = 'Show Script';
+
+    scriptOutputMissingCons.classList.add('hidden');
+    if(toggleMissingCons) toggleMissingCons.textContent = 'Show Script';
+
+    scriptOutputMissingComm.classList.add('hidden');
+    if(toggleMissingComm) toggleMissingComm.textContent = 'Show Script';
+
+    scriptOutputPublish.classList.add('hidden');
+    if(togglePublish) togglePublish.textContent = 'Show Script';
 
     // --- Generate Summary ---
     var summaryLines = [];
@@ -537,24 +643,60 @@
   btnClear.addEventListener('click', function () {
     textarea.value = '';
     resultSection.classList.add('hidden');
-    emptyMessage.innerHTML = '';
-    emptyDetails.innerHTML = '';
-    publishMessage.innerHTML = '';
+    emptyConsDetails.innerHTML = '';
+    emptyCommDetails.innerHTML = '';
+    groupedDisplayNamesDetails.innerHTML = '';
     publishDetails.innerHTML = '';
-    missingMessage.innerHTML = '';
-    missingDetails.innerHTML = '';
-    scriptOutput.textContent = '';
+    missingConsDetails.innerHTML = '';
+    missingCommDetails.innerHTML = '';
+    scriptOutputEmptyCons.textContent = '';
+    scriptOutputEmptyComm.textContent = '';
+    scriptOutputMissingCons.textContent = '';
+    scriptOutputMissingComm.textContent = '';
+    scriptOutputPublish.textContent = '';
     summaryText.innerHTML = '';
-    currentScriptContent = '';
+    currentScriptEmptyCons = '';
+    currentScriptEmptyComm = '';
+    currentScriptMissingCons = '';
+    currentScriptMissingComm = '';
+    currentScriptPublish = '';
     currentSummaryContent = '';
     updateAnalyzeButton();
   });
 
   // ===== COPY BUTTONS =====
-  var btnCopyScript = document.getElementById('dsa-btn-copy-script');
-  if (btnCopyScript) {
-    btnCopyScript.addEventListener('click', function () {
-      copyWithFeedback(currentScriptContent, btnCopyScript);
+  var btnCopyScriptEmptyCons = document.getElementById('dsa-btn-copy-script-empty-cons');
+  if (btnCopyScriptEmptyCons) {
+    btnCopyScriptEmptyCons.addEventListener('click', function () {
+      copyWithFeedback(currentScriptEmptyCons, btnCopyScriptEmptyCons);
+    });
+  }
+
+  var btnCopyScriptEmptyComm = document.getElementById('dsa-btn-copy-script-empty-comm');
+  if (btnCopyScriptEmptyComm) {
+    btnCopyScriptEmptyComm.addEventListener('click', function () {
+      copyWithFeedback(currentScriptEmptyComm, btnCopyScriptEmptyComm);
+    });
+  }
+
+  var btnCopyScriptMissingCons = document.getElementById('dsa-btn-copy-script-missing-cons');
+  if (btnCopyScriptMissingCons) {
+    btnCopyScriptMissingCons.addEventListener('click', function () {
+      copyWithFeedback(currentScriptMissingCons, btnCopyScriptMissingCons);
+    });
+  }
+
+  var btnCopyScriptMissingComm = document.getElementById('dsa-btn-copy-script-missing-comm');
+  if (btnCopyScriptMissingComm) {
+    btnCopyScriptMissingComm.addEventListener('click', function () {
+      copyWithFeedback(currentScriptMissingComm, btnCopyScriptMissingComm);
+    });
+  }
+
+  var btnCopyScriptPublish = document.getElementById('dsa-btn-copy-script-publish');
+  if (btnCopyScriptPublish) {
+    btnCopyScriptPublish.addEventListener('click', function () {
+      copyWithFeedback(currentScriptPublish, btnCopyScriptPublish);
     });
   }
 

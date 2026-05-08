@@ -361,7 +361,7 @@
     <div class="page-header">
       <div class="page-header-inner">
         <h1>DSA Check</h1>
-        <p>Paste CMX query results to check for blank Display Names and missing profiles (pt/br, fr/fr, zh/cn)</p>
+        <p>Paste CMX query results to check for blank Display Names and missing profiles</p>
       </div>
     </div>
 
@@ -392,38 +392,84 @@
       <!-- Results section (hidden by default) -->
       <div class="mp-results hidden" id="dsa-result-section">
         <!-- Empty Display Names -->
-        <div class="results-divider">Display Name Analysis</div>
+        <div class="results-divider">Unpublished Profiles Check</div>
 
-        <div class="mp-result-card dsa-result-card">
-          <p class="mp-message" id="dsa-empty-message"></p>
-          <p class="mp-message" id="dsa-publish-message"></p>
-        </div>
-
-        <div id="dsa-publish-details"></div>
-
-        <div id="dsa-empty-details" style="margin-top: 1.5rem;"></div>
-
-        <!-- Missing Profiles -->
-        <div class="results-divider" style="margin-top: 2rem;">Missing Profiles Check (pt/br, fr/fr, zh/cn)</div>
-
-        <div class="mp-result-card">
-          <p class="mp-message" id="dsa-missing-message"></p>
-        </div>
-
-        <div id="dsa-missing-details"></div>
-
-        <!-- Translation Script -->
-        <div id="dsa-script-section">
-          <div class="results-divider" style="margin-top: 2rem;">Translation Script</div>
-
-          <div class="script-block" id="dsa-script-output"></div>
-          <div style="display: flex; justify-content: flex-end; margin-top: 1rem;">
-            <button class="btn btn-primary" id="dsa-btn-copy-script">
+        <div id="dsa-publish-details" style="margin-top: 1.5rem;"></div>
+        <div id="dsa-script-section-publish" style="margin-top: 0.75rem;">
+          <button class="btn btn-sm btn-ghost" id="dsa-toggle-script-publish">Show Script</button>
+          <div class="script-block hidden" id="dsa-script-output-publish"></div>
+          <div style="display: flex; justify-content: flex-end; margin-top: 0.5rem;">
+            <button class="btn btn-primary" id="dsa-btn-copy-script-publish">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round"
                   d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
               </svg>
-              <span>Copy Script</span>
+              <span>Copy Publish Script</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="results-divider" style="margin-top: 2rem;">Blank Display Names Check</div>
+
+        <div id="dsa-empty-consumer-details" style="margin-top: 1.5rem;"></div>
+        <div id="dsa-script-section-empty-cons" style="margin-top: 0.75rem;">
+          <button class="btn btn-sm btn-ghost" id="dsa-toggle-script-empty-cons">Show Script</button>
+          <div class="script-block hidden" id="dsa-script-output-empty-cons"></div>
+          <div style="display: flex; justify-content: flex-end; margin-top: 0.5rem;">
+            <button class="btn btn-primary" id="dsa-btn-copy-script-empty-cons">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              <span>Copy Consumer Script</span>
+            </button>
+          </div>
+        </div>
+
+        <div id="dsa-empty-commercial-details" style="margin-top: 1.5rem;"></div>
+        <div id="dsa-script-section-empty-comm" style="margin-top: 0.75rem;">
+          <button class="btn btn-sm btn-ghost" id="dsa-toggle-script-empty-comm">Show Script</button>
+          <div class="script-block hidden" id="dsa-script-output-empty-comm"></div>
+          <div style="display: flex; justify-content: flex-end; margin-top: 0.5rem;">
+            <button class="btn btn-primary" id="dsa-btn-copy-script-empty-comm">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              <span>Copy Commercial Script</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Missing Profiles -->
+        <div class="results-divider" style="margin-top: 2rem;">Missing Profiles Check</div>
+
+        <div id="dsa-missing-consumer-details" style="margin-top: 1.5rem;"></div>
+        <div id="dsa-script-section-missing-cons" style="margin-top: 0.75rem;">
+          <button class="btn btn-sm btn-ghost" id="dsa-toggle-script-missing-cons">Show Script</button>
+          <div class="script-block hidden" id="dsa-script-output-missing-cons"></div>
+          <div style="display: flex; justify-content: flex-end; margin-top: 0.5rem;">
+            <button class="btn btn-primary" id="dsa-btn-copy-script-missing-cons">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              <span>Copy Missing Consumer Script</span>
+            </button>
+          </div>
+        </div>
+
+        <div id="dsa-missing-commercial-details" style="margin-top: 1.5rem;"></div>
+        <div id="dsa-script-section-missing-comm" style="margin-top: 0.75rem;">
+          <button class="btn btn-sm btn-ghost" id="dsa-toggle-script-missing-comm">Show Script</button>
+          <div class="script-block hidden" id="dsa-script-output-missing-comm"></div>
+          <div style="display: flex; justify-content: flex-end; margin-top: 0.5rem;">
+            <button class="btn btn-primary" id="dsa-btn-copy-script-missing-comm">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              <span>Copy Missing Commercial Script</span>
             </button>
           </div>
         </div>
@@ -443,6 +489,11 @@
             </button>
           </div>
         </div>
+
+        <!-- Grouped Display Names -->
+        <div class="results-divider" style="margin-top: 2rem;">Grouped Display Names</div>
+        <div id="dsa-grouped-display-names" style="margin-top: 1.5rem;"></div>
+      </div>
       </div>
     </div>
   </div>
