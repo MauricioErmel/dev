@@ -9,13 +9,14 @@
   var pageDashboard = document.getElementById('page-dashboard');
   var pageCompare = document.getElementById('page-compare');
   var pageMissingProfiles = document.getElementById('page-missing-profiles');
+  var pageDsaCheck = document.getElementById('page-dsa-check');
   var navLogo = document.getElementById('nav-logo');
   var compareEmptyState = document.getElementById('compare-empty-state');
   var compareContent = document.getElementById('compare-content');
   var subnavContainer = document.querySelector('.subnav-container');
 
   // State state
-  var currentMainTab = 'category'; // category | imm | faq | missing-profiles
+  var currentMainTab = 'category'; // category | imm | faq | missing-profiles | dsa-check
   var currentSubTab = 'dashboard'; // dashboard | compare
 
   // Dashboard elements
@@ -63,13 +64,25 @@
       subnavContainer.classList.add('hidden');
       pageDashboard.classList.remove('active');
       pageCompare.classList.remove('active');
+      pageDsaCheck.classList.remove('active');
       pageMissingProfiles.classList.add('active');
       return;
     }
 
-    // For all other tabs, show subnav and hide Missing Profiles
+    // DSA Check is a standalone page — hide subnav and other pages
+    if (tabId === 'dsa-check') {
+      subnavContainer.classList.add('hidden');
+      pageDashboard.classList.remove('active');
+      pageCompare.classList.remove('active');
+      pageMissingProfiles.classList.remove('active');
+      pageDsaCheck.classList.add('active');
+      return;
+    }
+
+    // For all other tabs, show subnav and hide standalone pages
     subnavContainer.classList.remove('hidden');
     pageMissingProfiles.classList.remove('active');
+    pageDsaCheck.classList.remove('active');
 
     // Update dashboard content
     renderDashboard();

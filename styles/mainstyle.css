@@ -1161,6 +1161,29 @@ body {
   color: #991b1b;
 }
 
+/* ===== DSA CHECK CARD ===== */
+.dsa-result-card {
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1.25rem 1.5rem;
+  border-left: 4px solid var(--warning);
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.06), rgba(245, 158, 11, 0.02));
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.12), var(--shadow-sm);
+}
+
+.dsa-result-card .mp-message {
+  font-size: 0.92rem;
+  line-height: 1.7;
+}
+
+.dsa-result-card .mp-message:empty {
+  display: none;
+}
+
+.mp-message-publish {
+  color: #7c2d12 !important;
+}
+
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
   .navbar {
