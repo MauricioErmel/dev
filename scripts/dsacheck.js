@@ -229,12 +229,65 @@
   }
 
   /**
-   * Format a list of {profile, segment} items into "profile (Segment)" strings.
+   * Group items by segment type and list their profiles.
+   * Returns a list of strings like "Consumer (ro/ro, it/it)".
    */
-  function formatProfileList(items) {
-    return items.map(function (item) {
-      return item.profile + ' (' + item.segment + ')';
+  function concatenateSegments(items) {
+    // 1. Group segments by profile to determine combined state
+    var profileSegments = {};
+    items.forEach(function (item) {
+      if (!profileSegments[item.profile]) {
+        profileSegments[item.profile] = {};
+      }
+      if (item.segment === 'Consumer and Commercial') {
+        profileSegments[item.profile]['Consumer'] = true;
+        profileSegments[item.profile]['Commercial'] = true;
+      } else {
+        profileSegments[item.profile][item.segment] = true;
+      }
     });
+
+    // 2. Group profiles by their combined segment string
+    var segmentGroups = {};
+    for (var profile in profileSegments) {
+      var segments = Object.keys(profileSegments[profile]);
+      var combinedLabel = '';
+      if (segments.length === 1) {
+        combinedLabel = segments[0];
+      } else if (segments.length > 1) {
+        var sortedSegs = segments.sort(function(a, b) {
+          if (a === 'Consumer') return -1;
+          if (b === 'Consumer') return 1;
+          return 0;
+        });
+        combinedLabel = sortedSegs.join(' and ');
+      }
+
+      if (!segmentGroups[combinedLabel]) {
+        segmentGroups[combinedLabel] = [];
+      }
+      segmentGroups[combinedLabel].push(profile);
+    }
+
+    // 3. Format result in preferred order
+    var result = [];
+    var order = ['Consumer', 'Commercial', 'Consumer and Commercial'];
+    order.forEach(function(label) {
+      if (segmentGroups[label] && segmentGroups[label].length > 0) {
+        segmentGroups[label].sort();
+        result.push(label + ' (' + segmentGroups[label].join(', ') + ')');
+        delete segmentGroups[label];
+      }
+    });
+
+    for (var label in segmentGroups) {
+      if (segmentGroups[label].length > 0) {
+        segmentGroups[label].sort();
+        result.push(label + ' (' + segmentGroups[label].join(', ') + ')');
+      }
+    }
+
+    return result;
   }
 
   /**
@@ -600,32 +653,27 @@
     // --- Generate Summary ---
     var summaryLines = [];
 
-    // Translation line
-    var translationAffected = [];
-    analysis.emptyDisplayNames.forEach(function (item) {
-      translationAffected.push(item.profile + ' (' + item.segment + ')');
-    });
-    analysis.missingProfiles.forEach(function (item) {
-      translationAffected.push(item.profile + ' (' + item.segment + ')');
-    });
-    var uniqueTranslation = [];
-    var seenT = {};
-    translationAffected.forEach(function (s) {
-      if (!seenT[s]) { seenT[s] = true; uniqueTranslation.push(s); }
-    });
-    if (uniqueTranslation.length > 0) {
-      summaryLines.push('Sent for translation the files for the profiles ' + naturalList(uniqueTranslation));
+    // 1. Display Name Translation
+    if (analysis.emptyDisplayNames.length > 0) {
+      var emptyFormatted = concatenateSegments(analysis.emptyDisplayNames);
+      summaryLines.push('Following profiles were sent for Display name translation only: ' + emptyFormatted.join(', '));
     }
 
-    // Publish line
+    // 2. Missing Profiles
+    if (analysis.missingProfiles.length > 0) {
+      var missingFormatted = concatenateSegments(analysis.missingProfiles);
+      summaryLines.push('Following profiles sent for translation because they were completely missing: ' + missingFormatted.join(', '));
+    }
+
+    // 3. Published line
     if (analysis.unpublishedProfiles.length > 0) {
-      var publishFormatted = formatProfileList(analysis.unpublishedProfiles);
-      summaryLines.push('Published the files for the profiles ' + naturalList(publishFormatted));
+      var publishFormatted = concatenateSegments(analysis.unpublishedProfiles);
+      summaryLines.push('Following profiles were in Draft and are now published: ' + publishFormatted.join(', '));
     }
 
     if (summaryLines.length > 0) {
-      currentSummaryContent = summaryLines.join('\n');
-      summaryText.innerHTML = summaryLines.map(function (line) { return '<div>' + line + '</div>'; }).join('');
+      currentSummaryContent = summaryLines.join('. ') + '.';
+      summaryText.innerHTML = '<div>' + currentSummaryContent + '</div>';
       document.getElementById('dsa-summary-section').classList.remove('hidden');
     } else {
       currentSummaryContent = '';
